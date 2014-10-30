@@ -1,0 +1,8 @@
+*.class
+*.settings
+*.classpath
+*.jar
+*.war
+target
+/target
+/tomcat.5000
