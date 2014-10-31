@@ -6,10 +6,9 @@
 <base href="">
 <meta charset="utf-8" />
 <title>miyamoto.foto</title>
-<script type="text/javascript" src="//use.typekit.net/ik/u4kyPVoC1DK1XbInUOo0gs6KZw0qu2IbnLULsowbjg9feC9gfFHN4UJLFRbh52jhWD9k5eIhZ2JaZQsKw2jhZR4yjc9hw2yKFUT1iaiaO1m0-WZ8S1Fyde8DjABROcFzdPUudc8hZW4DjAUTShByjkoRdhXC-WFyjAwldc8R-eNCSkoDSWmyScmDSeBRZPoRdhXCHKoTShByjku0-AFGdhUDO1FUiABkZWF3jAF8OcFzdPJ4Z1mXiW4yOWgXH6qJyB9bMg6IJMJ7fbKfmsMMegI6MKG4fJBmIMMjgkMfH6qJym9bMg65JMJ.js"></script>
-<script type="text/javascript">try{Typekit.load();}catch(e){}</script>
-<link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Actor:normal|Open+Sans:300,300italic,400,400italic,600,600italic,700,700italic,800,800italic"/>
 <link rel="stylesheet" type="text/css" href="/includes/site.css"/>
+<link rel="shortcut icon" href="includes/favicon.ico" type="image/x-icon">
+<link rel="icon" href="includes/favicon.ico" type="image/x-icon">
 <script type="text/javascript">
   //document.domain = "miyafoto";
   function resizeIframe(iframe) {

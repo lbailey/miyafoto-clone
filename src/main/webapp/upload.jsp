@@ -1,9 +1,6 @@
 <!doctype html>
 <html xmlns:og="http://opengraphprotocol.org/schema/" xmlns:fb="http://www.facebook.com/2008/fbml" itemscope itemtype="http://schema.org/Thing" lang="en-US">
 <head>
-<script type="text/javascript" src="//use.typekit.net/ik/u4kyPVoC1DK1XbInUOo0gs6KZw0qu2IbnLULsowbjg9feC9gfFHN4UJLFRbh52jhWD9k5eIhZ2JaZQsKw2jhZR4yjc9hw2yKFUT1iaiaO1m0-WZ8S1Fyde8DjABROcFzdPUudc8hZW4DjAUTShByjkoRdhXC-WFyjAwldc8R-eNCSkoDSWmyScmDSeBRZPoRdhXCHKoTShByjku0-AFGdhUDO1FUiABkZWF3jAF8OcFzdPJ4Z1mXiW4yOWgXH6qJyB9bMg6IJMJ7fbKfmsMMegI6MKG4fJBmIMMjgkMfH6qJym9bMg65JMJ.js"></script>
-<script type="text/javascript">try{Typekit.load();}catch(e){}</script>
-<link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Actor:normal|Open+Sans:300,300italic,400,400italic,600,600italic,700,700italic,800,800italic"/>
 <link rel="stylesheet" type="text/css" href="/includes/site.css"/>
 
 </head>
