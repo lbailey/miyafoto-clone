@@ -10,10 +10,10 @@
 <div id="accordian" name="photoSets">
 	<ul>
 		<li class="active">
-			<p><span class="icon-dashboard"></span>Culture</p>
+			<p><span class="icon-dashboard"></span>Festival</p>
 			<ul>
-				<li><a href="#" photoSetId="">Awaodori</a></li>
-				<li><a href="#" photoSetId="72157647007092415">Bonodori</a></li>
+				<li><a href="#" photoSetId="72157648684846708">Awaodori</a></li>
+				<li><a href="#" photoSetId="72157648684796828">Bonodori</a></li>
 			</ul>
 		</li>
 		<li>
