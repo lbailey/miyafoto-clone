@@ -535,7 +535,14 @@ span.zoomed::before {
 .helperText {
   text-transform: uppercase; 
   color:#78260c;
+  margin-bottom: 10px;
+}
+.pad30 {
   margin-bottom: 30px;
+}
+
+.pad10 {
+  margin-bottom: 10px;
 }
 #accordian {
   width: 250px;

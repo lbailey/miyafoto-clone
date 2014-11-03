@@ -66,7 +66,7 @@ $(document).ready(function ($) {
 					
 			htmlCollage += "<img src=\"" + mSrc +"\"  csource=\""+ cSrc + "\" />";
 			$("#viewWrapper").html(htmlViewport);
-			$("#collage").append(htmlCollage);	
+			$("#collage").html(htmlCollage);	
 		  });
 	    });
 	  
@@ -131,7 +131,7 @@ $(document).ready(function ($) {
 
 		var lightbox = '<div id="lightbox">' +
 		'<div id="content">' + 
-		'<img src="' + $(this).attr( "csource" ) +'" style="height: '+viewheight/4+'px; margin-top: '+ viewheight/32 +'px;" />' + 
+		'<img src="' + $(this).attr( "csource" ) +'" style="height: '+viewheight/3+'px; margin-top: '+ viewheight/32 +'px;" />' + 
 		'<span class="zoomed"></span></img></div>' +	
 		'</div>';
 		$('body', window.parent.document).append(lightbox);
@@ -142,7 +142,7 @@ $(document).ready(function ($) {
 
 		var lightbox = '<div id="lightbox">' +
 		'<div id="content">' + 
-		'<img src="' + $(this).attr( "csource" ) +'" style="height: '+viewheight/4+'px; margin-top: '+ viewheight/32 +'px;" />' + 
+		'<img src="' + $(this).attr( "csource" ) +'" style="height: '+viewheight/3+'px; margin-top: '+ viewheight/32 +'px;" />' + 
 		'<span class="zoomed"></span></img></div>' +	
 		'</div>';
 		$('body', window.parent.document).append(lightbox);

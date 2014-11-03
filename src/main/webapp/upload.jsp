@@ -6,7 +6,7 @@
 </head>
   
 <body>
-<p class="helperText">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select an Album . . .</p>
+<p class="helperText pad30">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select an Album . . .</p>
 <div id="accordian" name="photoSets">
 	<ul>
 		<li>
