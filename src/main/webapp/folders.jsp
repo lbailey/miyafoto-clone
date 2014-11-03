@@ -57,14 +57,21 @@
         var folders = window.parent.document.getElementById('center');
         var parentTag = $(this).parent().get(0).getAttribute("name");
 		folders.src = "http://"+$(location).attr('host') + "/viewport.jsp#"+parentTag;
-		folders.contentWindow.location.reload()
+		console.log(folders.src);
+		folders.contentWindow.location.reload();
+		folders.src = folders.src;
     });
 
 });   
 
+  var photoEmpty = "15508109759";
+  var isEmpty = "";
   $.getJSON('/flickr/albums', function(json) {
   	$.each(json,function(c, coll){
   	  $.each(coll, function(i, value) {
+  	  
+  	    if (parseInt(value.setCount) > 1) {
+  	    console.log("writing " + i );
    		var html = "";
 		html += "<div id=\"sectionWrapper\" name=\""+ value.setId+"\">" +
 	    		"<div id=\"slider\" name=\""+ value.setId+"\">" +
@@ -72,8 +79,11 @@
 	  		    	"<a href=\"#\" class=\"control_prev\"> <<</a>" +
 			    	"<div class=\"albumTitle\">"+ value.setName+"</div>" +
 					"<section class=\"imgSet\">";
-					
-		$.each(value.photos,function(photoId, data){		
+		
+		console.log('length '+ value.setCount);
+		
+		$.each(value.photos,function(photoId, data){	
+		   //if (photoId === photoEmpty) return false;		
 			$.each(data,function(size, crops){
 				if (size === 'Square') {
 				    html += "<img src=\""+ crops.source +"\" id=\""+ photoId +"\"/>\n";
@@ -81,8 +91,9 @@
 			});
     	});
     	html += "</section></div></div>";
-    	$("#wrapper > img").css({"display": "none"});
-    	$("#wrapper").append(html);
+		$("#wrapper > img").css({"display": "none"});
+		$("#wrapper").append(html);
+		}
     });
   });
 });

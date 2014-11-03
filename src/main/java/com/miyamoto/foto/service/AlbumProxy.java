@@ -46,7 +46,16 @@ public class AlbumProxy extends HttpServlet {
 
 	@Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {		
-		getList(request,response);	
+		try {
+			if (request.getParameter("photoSetId") != null) {
+				String photoSetId = request.getParameter("photoSetId");
+				getAlbum(request,response,photoSetId);
+			} else {
+				getList(request,response);	
+			}
+		} catch(Exception ex) {
+		
+		}
     }
     
     @Override
@@ -69,6 +78,18 @@ public class AlbumProxy extends HttpServlet {
 		try { 
 		  Integration ppl = new Integration();
 		  String resStr = ppl.compileJsonResponse();
+		  response.getWriter().println(resStr);
+	   } catch(Exception ex) {
+		   System.out.println(ex);
+	   }
+
+    }    
+    
+    protected void getAlbum(HttpServletRequest request, HttpServletResponse response, String photoSetId) {
+    
+		try { 
+		  Integration ppl = new Integration();
+		  String resStr = ppl.specificPhotoSetJson(photoSetId);
 		  response.getWriter().println(resStr);
 	   } catch(Exception ex) {
 		   System.out.println(ex);

@@ -81,6 +81,11 @@ public class Integration {
     	return this.user;
     }
     
+    //
+    //
+    // Request to Flickr
+    //
+    //
     public String postToFlikr() {  	
     	OAuthRequest request = new OAuthRequest(Verb.POST, "https://up.flickr.com/services/upload/");
             	
@@ -109,6 +114,11 @@ public class Integration {
 
     }	
     
+    //
+    //
+    // Request to Flickr
+    //
+    //
     public String moveToAlbum(String photosetId, String photoId) {
     	
     	Map<String, Object> parameters = new HashMap<String, Object>();
@@ -139,9 +149,13 @@ public class Integration {
     
     }
     
-    // Retrieves the list of albums
+    //
+    //
+    // Request from Flickr
+    //
+    //
     public String getPhotoSetList() {
-    	
+ 		long pslS = System.nanoTime();      	
 		Map<String, Object> parameters = new HashMap<String, Object>();
         parameters.put("user_id", getUser().getUserId());
 	
@@ -163,14 +177,21 @@ public class Integration {
               
         Response scribeResponse = request.send();
         String strXml = scribeResponse.getBody();
+        
+		long pslE = System.nanoTime();
+		long pslD = (pslE - pslS)/1000000;
+		System.out.println("retrieve photo set list : "+pslD);
         return strXml;          
     }
     
     
-    
-    
+    //
+    //
+    // Request from Flickr
+    //
+    //
 	public String getPhotosOfSet(String setId) {
-    	
+		long posS = System.nanoTime();    	
 		Map<String, Object> parameters = new HashMap<String, Object>();
         parameters.put("photoset_id", setId);
         
@@ -195,19 +216,65 @@ public class Integration {
         
         Response scribeResponse = request.send();
         String strXml = scribeResponse.getBody();
+        
+		long posE = System.nanoTime();
+		long posD = (posE - posS)/1000000;
+		System.out.println("retrieve photos of set: "+posD);
 
         return strXml;    
     }
     
-    
+    //
+    //
+    // helper
+    //
+    //
     public String cleanJsonResponse(String responseString) {
     	return responseString.substring(responseString.indexOf("{"));
     }
     
+    //
+    //
+    // Response to miyamoto-foto app
+    //
+    //
+    public String specificPhotoSetJson(String setId) {
+		String photoJsonString = cleanJsonResponse(getPhotosOfSet(setId));
+		JSONObject photosJson = new JSONObject(photoJsonString);
+		
+		JSONObject setJson = new JSONObject();
+		PhotoSet ps = parsePhotoSetResponse(setId, "", "", photoJsonString);
+		
+		// create descending iterator
+     	Iterator<Photo> photosDescending = ps.getPhotoSet().descendingIterator();
+		
+			JSONObject photoJson = new JSONObject();
+			while (photosDescending.hasNext()){
+				Photo p = photosDescending.next();
+				JSONObject cropJson = new JSONObject();
+				for (Crop crop : p.getCropList()) {
+					JSONObject cropInfo = new JSONObject();
+					cropInfo.put("source",crop.getCropSrc());
+					cropInfo.put("width", crop.getWidth());
+					cropInfo.put("height", crop.getHeight());
+					cropJson.put(crop.getCropLabel(), cropInfo);
+				}
+				photoJson.put(p.getPhotoId(), cropJson);
+			}
+			setJson.put("photos", photoJson);
+				
+		return setJson.toString();           
+    }
+    
+    //
+    //
+    // Response to miyamoto-foto app
+    //
+    //
     public String compileJsonResponse() {
 		JSONObject jsonObject = new JSONObject();
 		TreeMap<String,PhotoSet> completeStuff = retrieveFlickrPhotoSets();
-		
+		long jsonS = System.nanoTime();		
 		JSONArray collArray = new JSONArray();
 		
 		for (String album : completeStuff.descendingKeySet()) {
@@ -216,6 +283,7 @@ public class Integration {
 			setJson.put("setName", ps.getPhotoSetName());
 			setJson.put("setId", ps.getPhotoSetId());
 			setJson.put("setTitle", ps.getPhotoSetTitle());
+			setJson.put("setCount", ps.getPhotoSetCount());
 			
 			// create descending iterator
      		Iterator<Photo> photosDescending = ps.getPhotoSet().descendingIterator();
@@ -237,15 +305,68 @@ public class Integration {
 			collArray.put(setJson);
 		}
 		
-		jsonObject.put("result", collArray);		
+		jsonObject.put("result", collArray);	
+		
+		long jsonE = System.nanoTime();
+		long jsonD = (jsonE - jsonS)/1000000;
+		System.out.println("write to json: "+jsonD);	
 		return jsonObject.toString();           
     }
     
+    //
+    //
+    // Interpreting
+    //
+    //
+    public PhotoSet parsePhotoSetResponse(String setId, String setTitle, String setDesc, String photoJsonString) {    
+		JSONObject photosJson = new JSONObject(photoJsonString);
+		JSONObject photosObject = photosJson.getJSONObject("photoset");
+		
+		int photoCount = Integer.parseInt(photosObject.get("total").toString());
+		PhotoSet aPhotoSet = new PhotoSet(setId, setTitle, setDesc, photoCount);
+					
+		JSONArray photosArr = photosObject.getJSONArray("photo");
+		
+		// TODO: Pull the date in extras, check against the date and create a chron list
+		// "date_upload" is the key
+		for (int k = 0; k < photoCount; k++) {
+			JSONObject photoOne = (JSONObject) photosArr.get(k);
+			String photoId = photoOne.get("id").toString();
+			String photoSecret = photoOne.get("secret").toString();
+			String photoTitle = photoOne.get("title").toString();
+			String photoUpdated = photoOne.get("dateupload").toString(); 
+	
+			double w = Double.parseDouble(photoOne.get("width_m").toString());
+			double h = Double.parseDouble(photoOne.get("height_m").toString());
+			double photoAspect = w/h;
+			
+			String url_c = getLargeSrcUrl(photoOne.get("url_m").toString());
+			Photo aPhoto = new Photo(photoId, photoSecret, photoTitle, photoAspect, Integer.parseInt(photoUpdated));
+			aPhoto.addSquareCrop(photoOne.get("url_sq").toString(), photoOne.get("width_sq").toString(), photoOne.get("height_sq").toString());  
+			aPhoto.addMediumCrop(photoOne.get("url_m").toString(), photoOne.get("width_m").toString(), photoOne.get("height_m").toString());    
+			aPhoto.addOriginal(photoOne.get("url_o").toString(), photoOne.get("width_o").toString(), photoOne.get("height_o").toString());
+			aPhoto.addLargeCrop(url_c, "800", "600");
+			aPhotoSet.addPhotoToSet(aPhoto);  
+		}
+    	return aPhotoSet;
+    }
+    
+    
+    //
+    //
+    // Interpreting
+    //
+    //
     public TreeMap<String,PhotoSet> retrieveFlickrPhotoSets() {
     		
-    	TreeMap<String,PhotoSet> entireCollection = new TreeMap<String,PhotoSet>();
-		
+    	TreeMap<String,PhotoSet> entireCollection = new TreeMap<String,PhotoSet>();		
+		long pslS = System.nanoTime();
     	String photoSetListString = cleanJsonResponse(getPhotoSetList());
+		long pslE = System.nanoTime();
+		long pslD = (pslE - pslS)/1000000;
+		System.out.println("getPhotoSetList: "+pslD);
+
+		long plS = System.nanoTime();
         JSONObject setListJson = new JSONObject(photoSetListString);
         JSONObject setListObject = setListJson.getJSONObject("photosets");
         
@@ -259,42 +380,23 @@ public class Integration {
 			String dateUpdate =  photoSetOne.get("date_update").toString();                    // <--- order! long date val
 			String setTitle = photoSetOne.getJSONObject("title").get("_content").toString();
 			String setDesc = photoSetOne.getJSONObject("description").get("_content").toString();
-			PhotoSet aPhotoSet = new PhotoSet(setId, setTitle, setDesc);
-
-			String photoJsonString = cleanJsonResponse(getPhotosOfSet(setId));
-			JSONObject photosJson = new JSONObject(photoJsonString);
-		
-			JSONObject photosObject = photosJson.getJSONObject("photoset");
-			int photoCount = Integer.parseInt(photosObject.get("total").toString());
-						
-			JSONArray photosArr = photosObject.getJSONArray("photo");
 			
-			// TODO: Pull the date in extras, check against the date and create a chron list
-			// "date_upload" is the key
-			for (int k = 0; k < photoCount; k++) {
-				JSONObject photoOne = (JSONObject) photosArr.get(k);
-				String photoId = photoOne.get("id").toString();
-				String photoSecret = photoOne.get("secret").toString();
-				String photoTitle = photoOne.get("title").toString();
-				String photoUpdated = photoOne.get("dateupload").toString(); 
-		
-				double w = Double.parseDouble(photoOne.get("width_m").toString());
-				double h = Double.parseDouble(photoOne.get("height_m").toString());
-				double photoAspect = w/h;
-				
-				Photo aPhoto = new Photo(photoId, photoSecret, photoTitle, photoAspect, Integer.parseInt(photoUpdated));
-				aPhoto.addSquareCrop(photoOne.get("url_sq").toString(), photoOne.get("width_sq").toString(), photoOne.get("height_sq").toString());  
-				aPhoto.addMediumCrop(photoOne.get("url_m").toString(), photoOne.get("width_m").toString(), photoOne.get("height_m").toString());  
-				aPhoto.addOriginal(photoOne.get("url_o").toString(), photoOne.get("width_o").toString(), photoOne.get("height_o").toString());
-				aPhotoSet.addPhotoToSet(aPhoto);  
-			}      
-			//entireCollection.put(setTitle, aPhotoSet);
+			String photoJsonString = cleanJsonResponse(getPhotosOfSet(setId));
+			PhotoSet aPhotoSet = parsePhotoSetResponse(setId, setTitle, setDesc, photoJsonString);
+
 			entireCollection.put(dateUpdate, aPhotoSet);   
         }
-    
+		
+		long plE = System.nanoTime();
+		long plD = (plE - plS)/1000000;
+		System.out.println("data logic: "+plD);
+
     	return entireCollection;
     }
       
+    private String getLargeSrcUrl(String mUrl) {
+    	return mUrl.replaceAll("\\.(?=[^.]+$)", "_c.");
+    }
     
     private String getMultipartBoundary() {
         return "---------------------------7d273f7a0d3";

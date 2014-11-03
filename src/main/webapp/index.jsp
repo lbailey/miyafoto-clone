@@ -18,7 +18,7 @@
 </script> 
 </head>
   
-  <body class="miyamoto logo-image" id="collection-528a95c6e4b02789e9a452ec">
+  <body class="miyamoto logo-image">
 
     <div id="canvasWrapper">
     	<div id="canvas">
@@ -29,7 +29,7 @@
 				  <nav class="main-nav">
 					<ul id="siteNav">
 					  <li class="toggle"><a href="#mobileNav" id="mobile-show-nav" class="icon-list"></a></li>
-						<li class="page-collection"><a href="#">About</a></li>
+						<li class="page-collection"><a href="#" id="introPage">About</a></li>
 						<li class="page-collection"><a href="#">Templating</a></li>
 						<li class="page-collection active-link"><a href="#">Login</a></li>
 					</ul>
@@ -43,7 +43,7 @@
 		<iframe id="left" src="upload.jsp" scrolling="no">
 		</iframe>
 	
-		<iframe id="center" src="viewport.jsp#72157646827612988" scrolling="no" name="viewportFrame">
+		<iframe id="center" src="intro.jsp" scrolling="yes" name="viewportFrame">
 		</iframe>
 	
 	
@@ -58,8 +58,17 @@
     	</div><!-- / #canvas -->
     </div><!-- / #canvasWrapper -->
 
- 
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script type="text/javascript">
+//  document.domain = "miyafoto";
+  $(document).ready(function ($) {
 
+    $("#introPage").on("click", function () {
+		$( '#center' ).attr( 'src', function ( i, val ) { return "http://"+$(location).attr('host') + "/intro.jsp"; });
+    });
+
+});   
+</script> 
   
 
   </body>

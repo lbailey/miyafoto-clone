@@ -150,18 +150,9 @@ h4 {
   font-family: Coustard, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", serif;
 }
 h1 {
-  font-family: Coustard, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", serif;
-  font-weight: normal;
-  text-transform: none;
-  letter-spacing: 1px;
-  font-family: "Open Sans";
-  font-size: 24px;
-  line-height: 1.3em;
-  text-transform: uppercase;
-  text-decoration: none;
-  letter-spacing: 3px;
-  font-weight: 700;
-  font-style: normal;
+  color: #78260c;
+  font-size: 20px;
+  line-height: 1.2em;
 }
 h2 {
   color: #78260c;
@@ -204,7 +195,9 @@ nav ul,
 nav ol {
   margin: 0;
 }
-
+.bold {
+  font-weight: bold;
+}
 #topNav a {
   font-family: Actor, Helvetica, Arial, sans-serif;
   font-weight: normal;
@@ -273,7 +266,7 @@ nav ol {
   position: relative;
   min-width: 200px;
   max-width: 20%;
-  height: 2000px;
+  height: 1500px;
   overflow: hidden;
   margin-right: 10px;
 }
@@ -283,7 +276,7 @@ nav ol {
   margin: 0 auto;
   width: 40%;
   min-width: 300px;
-  height: 2000px;
+  height: 1500px;
   overflow: hidden;
 }
 #right {
@@ -293,8 +286,8 @@ nav ol {
   width: 35%;
   min-width: 230px;
   float: right;
-  height: 800px;
-  overflow: hidden;
+  height: 1500px;
+  overflow-y: auto;
 }
 #sectionWrapper {
   margin-bottom: 30px;
@@ -352,6 +345,35 @@ nav ol {
 
 .viewport_option {
   margin-top: 30px;
+}
+
+#collage {
+  padding:10px;
+  display: none;
+}
+
+#collage img {
+  vertical-align:bottom;
+  opacity:0;
+}
+
+.viewToggle {
+  float: right;
+}
+
+.viewToggle .slide {
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.viewToggle .grid {
+  font-weight: normal;
+  cursor: pointer;
+}
+
+a.grid:hover,
+a.slide:hover { 
+  text-decoration: underline;
 }
 
 #lightbox {
@@ -491,6 +513,13 @@ span.zoomed::before {
 	background: url("miyamoto.png") no-repeat right center;
 }
 
+.black {
+  color: #000;
+}
+.indent {
+  padding-left: 10px;
+}
+
 .imgSet {
   white-space: nowrap;
 }
@@ -506,6 +535,7 @@ span.zoomed::before {
 .helperText {
   text-transform: uppercase; 
   color:#78260c;
+  margin-bottom: 30px;
 }
 #accordian {
   width: 250px;
@@ -553,10 +583,16 @@ span.zoomed::before {
   float: right;
   content: "  \221A";
 }
+
+.ajax-upload-dragdrop {
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+}
 .upload-statusbar {
   margin-top: 10px;
   padding: 5px;
 }
+
 .upload-filename {
 width: 100%;
 height: auto;
@@ -631,8 +667,6 @@ margin-right:5px;
 .upload {
   padding: 15px 20px;
   display: inline-block;
-  border-top: 1px solid #eee;
-  border-bottom: 1px solid #eee;
 }
   
 .upload:hover {

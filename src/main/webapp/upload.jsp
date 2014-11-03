@@ -9,48 +9,76 @@
 <p class="helperText">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select an Album . . .</p>
 <div id="accordian" name="photoSets">
 	<ul>
+		<li>
+			<p><span class="icon-tasks"></span>Athletic</p>
+			<ul>
+				<li><a href="#" photoSetId="">Badman Events</a></li>
+				<li><a href="#" photoSetId="">Badgirl Events</a></li>
+			</ul>
+		</li>
 		<li class="active">
 			<p><span class="icon-dashboard"></span>Festival</p>
 			<ul>
-				<li><a href="#" photoSetId="72157648684846708">Awaodori</a></li>
-				<li><a href="#" photoSetId="72157648684796828">Bonodori</a></li>
+				<li><a href="#" photoSetId="72157648684846708">Spring Fest</a></li>
+				<li><a href="#" photoSetId="72157648684846708">Awa Odori</a></li>
+				<li><a href="#" photoSetId="72157648684796828">Bon Odori</a></li>
 			</ul>
 		</li>
 		<li>
 			<p><span class="icon-tasks"></span>Formal</p>
 			<ul>
-				<li><a href="#" photoSetId="">April Badman Ball</a></li>
-				<li><a href="#" photoSetId="">November Badman Ball</a></li>
-				<li><a href="#" photoSetId="">Christmas Party</a></li>
+				<li><a href="#" photoSetId="">Badgirl Octoberfest Ball</a></li>
+			    <li><a href="#" photoSetId="">Change of Command</a></li>
+				<li><a href="#" photoSetId="">Badman Ball</a></li>
+				<li><a href="#" photoSetId="">Badgirl Miss Universe Ball</a></li>
+				<li><a href="#" photoSetId="">Christmas Mask at New Sanno</a></li>
 			</ul>
 		</li>
 		<li>
 			<p><span class="icon-calendar"></span>Social</p>
 			<ul>
-				<li><a href="#" photoSetId="">Ziplining</a></li>
-				<li><a href="#" photoSetId="">Pool Party</a></li>
-				<li><a href="#" photoSetId="">Lunches</a></li>
+				<li><a href="#" photoSetId="">OSC Treat Exchange</a></li>
+				<li><a href="#" photoSetId="">Squadron Treat Drop</a></li>
+				<li><a href="#" photoSetId="">MWR Trips</a></li>
+				<li><a href="#" photoSetId="">All-Spouse Events</a></li>
+				<li><a href="#" photoSetId="">Dinners & Drinks</a></li>
 			</ul>
 		</li>
 		<li>
 			<p><span class="icon-heart"></span>Shower</p>
 			<ul>
-				<li><a href="#" photoSetId="">Katelyn</a></li>
+				<li><a href="#" photoSetId="">Bethany</a></li>
+				<li><a href="#" photoSetId="">Kaitlin</a></li>
 				<li><a href="#" photoSetId="">Teena</a></li>
+				<li><a href="#" photoSetId="">Andrea</a></li>
+			</ul>
+		</li>
+		<li>
+			<p><span class="icon-heart"></span>Holiday</p>
+			<ul>
+				<li><a href="#" photoSetId="">Feed the Sailors</a></li>
+				<li><a href="#" photoSetId="">Christmas Luau</a></li>
+				<li><a href="#" photoSetId="">Christmas Ugly Sweater</a></li>
+				<li><a href="#" photoSetId="">Christmas Spouse Party</a></li>
+				<li><a href="#" photoSetId="">Christmas Tree Decorating</a></li>
+				<li><a href="#" photoSetId="">Secret Santa Reveal</a></li>
 			</ul>
 		</li>
 		<li>
 			<p><span class="icon-heart"></span>Misc</p>
 			<ul>
-				<li><a href="#" photoSetId="">Misc</a></li>
+				<li><a href="#" photoSetId="">OSC Gatherings</a></li>
+				<li><a href="#" photoSetId="">Hail & Farewell</a></li>
+				<li><a href="#" photoSetId="">Friends & Family</a></li>
+				<li><a href="#" photoSetId="">Uncategorized</a></li>
 			</ul>
 		</li>
 	</ul>
 </div>
 
+
 <div id="mulitplefileuploader"></div>
-<div id="status"></div>
-          </p>
+ <div id="status"></div>         </p>
               
 <div style="margin-left: auto; margin-right: auto; text-align: center;">
 <br /><br />
@@ -76,7 +104,7 @@ $(document).ready(function(){
 	$("#accordian ul li ul li a").click(function() {
 		$('.selected').removeClass('selected');
 		$(this).addClass('selected');
-		$('#ajax-upload').css({"visibility":"visible"});
+		$('#ajax-upload').css({"display":"block"});
 		photoSetId = $(this).attr('photoSetId');
 		return false;
 	});
@@ -86,19 +114,23 @@ $(document).ready(function(){
     method: "POST",
     allowedTypes:"jpg,jpeg,png,gif",
     multiple: true,
+    onSubmit:function(responseData,files) {
+        $("#status").html("<div style='color:red;margin:15px;'>Uploading...</div>");
+        $('#status').insertAfter("#mulitplefileuploader");
+    },
     onSuccess:function(files,responseData,xhr) {
         $.post( "/flickr/albums", { photoSetId: photoSetId, photoId: responseData.trim() } );
     },
     afterUploadAll:function() {
-        $("#status").html("<div style='color:green;margin-left:15px;'>Upload successful</div>");
+        $("#status").html("<div style='color:green;margin:15px;'>Upload successful</div>");
 		$('#ajax-upload').parent().find("input[type=file]").val("");
-		$('#ajax-upload').parent().show();
+		$('#ajax-upload').parent().css({"display":"block"});
         //$('#right').contentWindow.location.reload(true);
         var folders = window.parent.document.getElementById('right');
 		folders.src = folders.src;
     },
     onError: function(files,status,errMsg) {        
-        $("#status").html("<font color='red'>Upload failed</font>");
+        $("#status").html("<font color='red;margin-left:15px;'>Upload failed</font>");
     }
 }
 $("#mulitplefileuploader").uploadFile(settings);

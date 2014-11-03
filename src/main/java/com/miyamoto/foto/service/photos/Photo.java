@@ -74,14 +74,15 @@ public class Photo implements Comparable<Photo>{
 		this.cropList.add(med);
 	}
 	
-	public void addLargeCrop(String lgSrc, String w, String h) {
-		Crop large = new Crop(Label.LARGE, photoAspect, lgSrc, w, h);
-		this.cropList.add(large);
-	}
-	
 	public void addOriginal(String oSrc, String w, String h) {
 		Crop original = new Crop(Label.ORIGINAL, photoAspect, oSrc, w, h);
 		this.cropList.add(original);
+	}
+	
+	//TODO: dynamically decipher with aspectRatio and 600x800 max sizes
+	public void addLargeCrop(String lgSrc, String w, String h) {       	
+		Crop large = new Crop(Label.LARGE, photoAspect, lgSrc, w, h);
+		this.cropList.add(large);
 	}
 	
 	public double aspectRatio(double width, double height) {

@@ -36,15 +36,17 @@ import com.miyamoto.foto.service.photos.Crop.Label;
 
 public class PhotoSet implements Comparator<Photo>{
 
+	private int photoSetCount;
     private TreeSet<Photo> photoSet;    
     private String photoSetId,
     			   photoSetTitle,
     			   photoSetName;
 
-    public PhotoSet(String id, String title, String name) {
+    public PhotoSet(String id, String title, String name, int count) {
     	this.photoSetId = id;
     	this.photoSetTitle = title;
     	this.photoSetName = name;
+    	this.photoSetCount = count;
     	this.photoSet = new TreeSet<Photo>();
     }
     
@@ -71,5 +73,13 @@ public class PhotoSet implements Comparator<Photo>{
 	
 	public String getPhotoSetName() {
 		return photoSetName;
+	}
+	
+	public String getPhotoSetCount() {
+		return String.format("%d", photoSetCount);
+	}
+			
+	public int getPhotoCount() {
+		return photoSetCount;
 	}
 }
