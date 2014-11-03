@@ -12,14 +12,14 @@
 		<li>
 			<p><span class="icon-tasks"></span>Athletic</p>
 			<ul>
-				<li><a href="#" photoSetId="">Badman Events</a></li>
-				<li><a href="#" photoSetId="">Badgirl Events</a></li>
+				<li><a href="#" photoSetId="72157648683693719">Badman Events</a></li>
+				<li><a href="#" photoSetId="72157646772374793">Badgirl Events</a></li>
 			</ul>
 		</li>
 		<li class="active">
 			<p><span class="icon-dashboard"></span>Festival</p>
 			<ul>
-				<li><a href="#" photoSetId="72157648684846708">Spring Fest</a></li>
+				<li><a href="#" photoSetId="72157648683096147">Spring Fest</a></li>
 				<li><a href="#" photoSetId="72157648684846708">Awa Odori</a></li>
 				<li><a href="#" photoSetId="72157648684796828">Bon Odori</a></li>
 			</ul>
@@ -27,50 +27,50 @@
 		<li>
 			<p><span class="icon-tasks"></span>Formal</p>
 			<ul>
-				<li><a href="#" photoSetId="">Badgirl Octoberfest Ball</a></li>
-			    <li><a href="#" photoSetId="">Change of Command</a></li>
-				<li><a href="#" photoSetId="">Badman Ball</a></li>
-				<li><a href="#" photoSetId="">Badgirl Miss Universe Ball</a></li>
-				<li><a href="#" photoSetId="">Christmas Mask at New Sanno</a></li>
+				<li><a href="#" photoSetId="72157648683737159">Badgirl Octoberfest Ball</a></li>
+			    <li><a href="#" photoSetId="72157649102848015">Change of Command</a></li>
+				<li><a href="#" photoSetId="72157649091148702">Badman Ball</a></li>
+				<li><a href="#" photoSetId="72157648683131097">Badgirl Miss Universe Ball</a></li>
+				<li><a href="#" photoSetId="72157648692195938">Christmas Mask at New Sanno</a></li>
 			</ul>
 		</li>
 		<li>
 			<p><span class="icon-calendar"></span>Social</p>
 			<ul>
-				<li><a href="#" photoSetId="">OSC Treat Exchange</a></li>
-				<li><a href="#" photoSetId="">Squadron Treat Drop</a></li>
-				<li><a href="#" photoSetId="">MWR Trips</a></li>
-				<li><a href="#" photoSetId="">All-Spouse Events</a></li>
-				<li><a href="#" photoSetId="">Dinners & Drinks</a></li>
+				<li><a href="#" photoSetId="72157648690945630">OSC Treat Exchange</a></li>
+				<li><a href="#" photoSetId="72157649090185101">Squadron Treat Drop</a></li>
+				<li><a href="#" photoSetId="72157649036603486">MWR Trips</a></li>
+				<li><a href="#" photoSetId="72157649090206761">All-Spouse Events</a></li>
+				<li><a href="#" photoSetId="72157649036628026">Dinners & Drinks</a></li>
 			</ul>
 		</li>
 		<li>
 			<p><span class="icon-heart"></span>Shower</p>
 			<ul>
-				<li><a href="#" photoSetId="">Bethany</a></li>
-				<li><a href="#" photoSetId="">Kaitlin</a></li>
-				<li><a href="#" photoSetId="">Teena</a></li>
-				<li><a href="#" photoSetId="">Andrea</a></li>
+				<li><a href="#" photoSetId="72157649102927455">Bethany</a></li>
+				<li><a href="#" photoSetId="72157649090230061">Kaitlin</a></li>
+				<li><a href="#" photoSetId="72157648692319738">Teena</a></li>
+				<li><a href="#" photoSetId="72157648692265598">Andrea</a></li>
 			</ul>
 		</li>
 		<li>
 			<p><span class="icon-heart"></span>Holiday</p>
 			<ul>
-				<li><a href="#" photoSetId="">Feed the Sailors</a></li>
-				<li><a href="#" photoSetId="">Christmas Luau</a></li>
-				<li><a href="#" photoSetId="">Christmas Ugly Sweater</a></li>
-				<li><a href="#" photoSetId="">Christmas Spouse Party</a></li>
-				<li><a href="#" photoSetId="">Christmas Tree Decorating</a></li>
-				<li><a href="#" photoSetId="">Secret Santa Reveal</a></li>
+				<li><a href="#" photoSetId="72157648683909119">Feed the Sailors</a></li>
+				<li><a href="#" photoSetId="72157648692349318">Christmas Luau</a></li>
+				<li><a href="#" photoSetId="72157648683936719">Christmas Ugly Sweater</a></li>
+				<li><a href="#" photoSetId="72157646772620263">Christmas Spouse Party</a></li>
+				<li><a href="#" photoSetId="72157649091340772">Christmas Tree Decorating</a></li>
+				<li><a href="#" photoSetId="72157648683354757">Secret Santa Reveal</a></li>
 			</ul>
 		</li>
 		<li>
 			<p><span class="icon-heart"></span>Misc</p>
 			<ul>
-				<li><a href="#" photoSetId="">OSC Gatherings</a></li>
-				<li><a href="#" photoSetId="">Hail & Farewell</a></li>
-				<li><a href="#" photoSetId="">Friends & Family</a></li>
-				<li><a href="#" photoSetId="">Uncategorized</a></li>
+				<li><a href="#" photoSetId="72157648692389178">OSC Gatherings</a></li>
+				<li><a href="#" photoSetId="72157648692394138">Hail & Farewell</a></li>
+				<li><a href="#" photoSetId="72157649090368331">Friends & Family</a></li>
+				<li><a href="#" photoSetId="72157649090373231">Uncategorized</a></li>
 			</ul>
 		</li>
 	</ul>

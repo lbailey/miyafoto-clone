@@ -286,7 +286,7 @@ nav ol {
   width: 35%;
   min-width: 230px;
   float: right;
-  height: 1500px;
+  height: 1000px;
   overflow-y: auto;
 }
 #sectionWrapper {
@@ -510,7 +510,7 @@ span.zoomed::before {
 /* TWEAK OPTIONS
 ***********************************************/
 .miyamoto {
-	background: url("miyamoto.png") no-repeat right center;
+	background: url("miyamoto.png") no-repeat right bottom;
 }
 
 .black {

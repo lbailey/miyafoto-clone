@@ -83,12 +83,12 @@
 		console.log('length '+ value.setCount);
 		
 		$.each(value.photos,function(photoId, data){	
-		   //if (photoId === photoEmpty) return false;		
+		   if (photoId != photoEmpty) {		
 			$.each(data,function(size, crops){
 				if (size === 'Square') {
 				    html += "<img src=\""+ crops.source +"\" id=\""+ photoId +"\"/>\n";
 				}
-			});
+			}); }
     	});
     	html += "</section></div></div>";
 		$("#wrapper > img").css({"display": "none"});
