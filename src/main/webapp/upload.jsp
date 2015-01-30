@@ -126,7 +126,13 @@ $(document).ready(function(){
 		$('#ajax-upload').parent().find("input[type=file]").val("");
 		$('#ajax-upload').parent().css({"display":"block"});
         //$('#right').contentWindow.location.reload(true);
-        var folders = window.parent.document.getElementById('right');
+        
+        //var folders = window.parent.document.getElementById('right');
+		//folders.src = folders.src;
+		var folders = window.parent.document.getElementById('right');
+		folders.src = "http://"+$(location).attr('host') + "/folders.jsp#"+photoSetId;
+		console.log(folders.src);
+		folders.contentWindow.location.reload();
 		folders.src = folders.src;
     },
     onError: function(files,status,errMsg) {        

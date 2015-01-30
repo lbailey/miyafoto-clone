@@ -38,6 +38,10 @@ import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.LoadingCache;
+import com.google.common.cache.CacheBuilder;
+
 import com.miyamoto.foto.service.OAuth;
 import com.miyamoto.foto.service.OAuth.User;
 import com.miyamoto.foto.service.OAuth.Permission;
@@ -52,8 +56,39 @@ public class Integration {
     private OAuth authorized;
     private User user;
 
-	//RestfulWrapper
-	//Flickr
+	//
+	//
+	// Uses Google Guava local mem cache 
+	//
+	//
+	public enum AlbumSetCache {
+		INSTANCE;
+		
+		private static Cache<String,PhotoSet> cache =
+				CacheBuilder.newBuilder()
+						.maximumSize(100)
+						.build();
+
+		public void expireAndAdd(String photoSetId, PhotoSet photoSet) {
+			cache.invalidate(photoSetId);
+			cache.put(photoSetId, photoSet);
+		}
+
+		public boolean hasKey(String photoSetId) {
+			return cache.getIfPresent(photoSetId) == null ? false : true;
+		}
+
+		public PhotoSet getPhotoSet(String photoSetId) {
+			return cache.getIfPresent(photoSetId);
+		}
+	}
+
+	//
+	//
+	// OAuth call to Flickr, authorize all transactions. To get these vals, use separate script located at ROOT directory
+	// TODO: Call these secret vals from server file
+	//
+	//
     public Integration() {
     	this.authorized = new OAuth("72157647029609305-838676ff0f16554f","8c281edcae082331","eccbfec6885f6adefb2fd063dce81a20","b114d59e550cf4e9", Permission.DELETE);
     	this.user = authorized.new User("126576272@N06","miyamoto.foto","Lindsay Papp"); 
@@ -83,7 +118,7 @@ public class Integration {
     
     //
     //
-    // Request to Flickr
+    // Post to Flickr: Proxy uploaded image to Flickr
     //
     //
     public String postToFlikr() {  	
@@ -116,7 +151,7 @@ public class Integration {
     
     //
     //
-    // Request to Flickr
+    // Post to Flickr: Tell Flickr to move image with specific ID to specific photo set with ID
     //
     //
     public String moveToAlbum(String photosetId, String photoId) {
@@ -151,7 +186,7 @@ public class Integration {
     
     //
     //
-    // Request from Flickr
+    // Post to Flickr: Query all Photo Sets (this returns basic album list)
     //
     //
     public String getPhotoSetList() {
@@ -187,7 +222,8 @@ public class Integration {
     
     //
     //
-    // Request from Flickr
+    // Post to Flickr: Get all photos associated with specific Photo Set Id (specific album)
+    // TODO: clean this--it is the most time-consuming method from Flickr.
     //
     //
 	public String getPhotosOfSet(String setId) {
@@ -219,14 +255,14 @@ public class Integration {
         
 		long posE = System.nanoTime();
 		long posD = (posE - posS)/1000000;
-		System.out.println("retrieve photos of set: "+posD);
+		System.out.println("getPhotosOfSet()->function time: "+posD);
 
         return strXml;    
     }
     
     //
     //
-    // helper
+    // Helper: Cleans JSON response
     //
     //
     public String cleanJsonResponse(String responseString) {
@@ -235,15 +271,15 @@ public class Integration {
     
     //
     //
-    // Response to miyamoto-foto app
+    // JSON: Calls a request to Flickr for a single PhotoSet (album)
     //
     //
     public String specificPhotoSetJson(String setId) {
 		String photoJsonString = cleanJsonResponse(getPhotosOfSet(setId));
 		JSONObject photosJson = new JSONObject(photoJsonString);
 		
-		JSONObject setJson = new JSONObject();
-		PhotoSet ps = parsePhotoSetResponse(setId, "", "", photoJsonString);
+		JSONObject setJson = new JSONObject();		//TODO: fill these values 
+		PhotoSet ps = parsePhotoSetResponse(setId, "", "", photoJsonString, "");
 		
 		// create descending iterator
      	Iterator<Photo> photosDescending = ps.getPhotoSet().descendingIterator();
@@ -268,13 +304,13 @@ public class Integration {
     
     //
     //
-    // Response to miyamoto-foto app
+    // JSON: Calls the Bulky method to retrieve all Photo Sets with corresponding Photos
     //
     //
-    public String compileJsonResponse() {
+    public String allPhotoSets(String invalidateId) {
 		JSONObject jsonObject = new JSONObject();
-		TreeMap<String,PhotoSet> completeStuff = retrieveFlickrPhotoSets();
-		long jsonS = System.nanoTime();		
+		TreeMap<String,PhotoSet> completeStuff = retrieveFlickrPhotoSets(invalidateId);
+	
 		JSONArray collArray = new JSONArray();
 		
 		for (String album : completeStuff.descendingKeySet()) {
@@ -305,25 +341,21 @@ public class Integration {
 			collArray.put(setJson);
 		}
 		
-		jsonObject.put("result", collArray);	
-		
-		long jsonE = System.nanoTime();
-		long jsonD = (jsonE - jsonS)/1000000;
-		System.out.println("write to json: "+jsonD);	
+		jsonObject.put("result", collArray);		
 		return jsonObject.toString();           
     }
     
     //
     //
-    // Interpreting
+    // Interpreting: Parses single PhotoSet response from Flickr to PhotoSet object
     //
     //
-    public PhotoSet parsePhotoSetResponse(String setId, String setTitle, String setDesc, String photoJsonString) {    
+    public PhotoSet parsePhotoSetResponse(String setId, String setTitle, String setDesc, String photoJsonString, String dateOfSet) {    
 		JSONObject photosJson = new JSONObject(photoJsonString);
 		JSONObject photosObject = photosJson.getJSONObject("photoset");
 		
 		int photoCount = Integer.parseInt(photosObject.get("total").toString());
-		PhotoSet aPhotoSet = new PhotoSet(setId, setTitle, setDesc, photoCount);
+		PhotoSet aPhotoSet = new PhotoSet(setId, setTitle, setDesc, photoCount, dateOfSet);
 					
 		JSONArray photosArr = photosObject.getJSONArray("photo");
 		
@@ -354,17 +386,18 @@ public class Integration {
     
     //
     //
-    // Interpreting
+    // Muscle: This references multiple Flickr queries and compiles a map response
+    // Uses Google cache to speed up PhotoSet query responses
     //
     //
-    public TreeMap<String,PhotoSet> retrieveFlickrPhotoSets() {
+    public TreeMap<String,PhotoSet> retrieveFlickrPhotoSets(String invalidateId) {
     		
     	TreeMap<String,PhotoSet> entireCollection = new TreeMap<String,PhotoSet>();		
 		long pslS = System.nanoTime();
-    	String photoSetListString = cleanJsonResponse(getPhotoSetList());
+    	String photoSetListString = cleanJsonResponse(getPhotoSetList()); //can't speed up
 		long pslE = System.nanoTime();
 		long pslD = (pslE - pslS)/1000000;
-		System.out.println("getPhotoSetList: "+pslD);
+		System.out.println("getPhotoSetList()->function time: "+pslD);
 
 		long plS = System.nanoTime();
         JSONObject setListJson = new JSONObject(photoSetListString);
@@ -373,7 +406,7 @@ public class Integration {
         int setCount = Integer.parseInt(setListObject.get("total").toString());        
         JSONArray setArr = setListObject.getJSONArray("photoset");
         
-        
+        // Scan PhotoSetList
         for (int i = 0; i < setCount; i++) {			
 			JSONObject photoSetOne = (JSONObject) setArr.get(i);
 			String setId = photoSetOne.get("id").toString();
@@ -381,27 +414,48 @@ public class Integration {
 			String setTitle = photoSetOne.getJSONObject("title").get("_content").toString();
 			String setDesc = photoSetOne.getJSONObject("description").get("_content").toString();
 			
-			String photoJsonString = cleanJsonResponse(getPhotosOfSet(setId));
-			PhotoSet aPhotoSet = parsePhotoSetResponse(setId, setTitle, setDesc, photoJsonString);
+			PhotoSet aPhotoSet;
+			if (AlbumSetCache.INSTANCE.hasKey(setId) && !invalidateId.equals(setId)) {
+				aPhotoSet = AlbumSetCache.INSTANCE.getPhotoSet(setId);
+			} else {
+				String photoJsonString = cleanJsonResponse(getPhotosOfSet(setId)); // Only do if cache is empty
+				aPhotoSet = parsePhotoSetResponse(setId, setTitle, setDesc, photoJsonString, dateUpdate);
+				AlbumSetCache.INSTANCE.expireAndAdd(setId, aPhotoSet);							
+			}
 
-			entireCollection.put(dateUpdate, aPhotoSet);   
+			entireCollection.put(aPhotoSet.getDateUpdated(), aPhotoSet);   
         }
 		
 		long plE = System.nanoTime();
 		long plD = (plE - plS)/1000000;
-		System.out.println("data logic: "+plD);
+		System.out.println("retrieveFlickrPhotoSets()->function time: "+plD);
 
     	return entireCollection;
     }
-      
+    
+    //
+    //
+    // Helper: Finds the Large Crop from source URL 
+    //
+    //
     private String getLargeSrcUrl(String mUrl) {
     	return mUrl.replaceAll("\\.(?=[^.]+$)", "_c.");
     }
     
+    //
+    //
+    // Helper: Query boundary
+    //
+    //
     private String getMultipartBoundary() {
         return "---------------------------7d273f7a0d3";
     }
     
+    //
+    //
+    // Helper: Mulipart body
+    //
+    //
     private byte[] buildMultipartBody(Map<String, Object> parameters, String boundary) {
 
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -423,6 +477,11 @@ public class Integration {
         return buffer.toByteArray();
     }
     
+    //
+    //
+    // Helper: Initializes query request
+    //
+    //
     private void writeParam(String name, Object value, ByteArrayOutputStream buffer, String boundary, String filename, String fileMimeType) throws IOException {
         if (value instanceof InputStream) {
             buffer.write(("Content-Disposition: form-data; name=\"" + name + "\"; filename=\"" + filename + "\";\r\n").getBytes("UTF-8"));
@@ -447,6 +506,3 @@ public class Integration {
         }
     }
 }
-
-//[^(\W{ticketid})].*?(?=</ticketid>)
-//[^(\W{photoid})].*?(?=</photoid>)

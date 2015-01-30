@@ -54,19 +54,20 @@
     });
     
     $("#wrapper").on("click", "div > div > div.albumTitle", function () {
-        var folders = window.parent.document.getElementById('center');
+        var viewport = window.parent.document.getElementById('center');
         var parentTag = $(this).parent().get(0).getAttribute("name");
-		folders.src = "http://"+$(location).attr('host') + "/viewport.jsp#"+parentTag;
-		console.log(folders.src);
-		folders.contentWindow.location.reload();
-		folders.src = folders.src;
+		viewport.src = "http://"+$(location).attr('host') + "/viewport.jsp#"+parentTag;
+		console.log(viewport.src);
+		viewport.contentWindow.location.reload();
+		viewport.src = viewport.src;
     });
 
 });   
 
+  var hash = window.location.hash.substring(1);
   var photoEmpty = "15508109759";
   var isEmpty = "";
-  $.getJSON('/flickr/albums', function(json) {
+  $.getJSON('/flickr/albums?invalidateAlbum='+hash, function(json) {
   	$.each(json,function(c, coll){
   	  $.each(coll, function(i, value) {
   	  

@@ -40,13 +40,15 @@ public class PhotoSet implements Comparator<Photo>{
     private TreeSet<Photo> photoSet;    
     private String photoSetId,
     			   photoSetTitle,
-    			   photoSetName;
+    			   photoSetName,
+    			   photoSetDateUpdate;
 
-    public PhotoSet(String id, String title, String name, int count) {
+    public PhotoSet(String id, String title, String name, int count, String date) {
     	this.photoSetId = id;
     	this.photoSetTitle = title;
     	this.photoSetName = name;
     	this.photoSetCount = count;
+    	this.photoSetDateUpdate = date;
     	this.photoSet = new TreeSet<Photo>();
     }
     
@@ -73,6 +75,10 @@ public class PhotoSet implements Comparator<Photo>{
 	
 	public String getPhotoSetName() {
 		return photoSetName;
+	}
+	
+	public String getDateUpdated() {
+		return photoSetDateUpdate;
 	}
 	
 	public String getPhotoSetCount() {

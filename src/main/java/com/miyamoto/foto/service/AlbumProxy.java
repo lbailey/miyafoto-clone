@@ -50,8 +50,11 @@ public class AlbumProxy extends HttpServlet {
 			if (request.getParameter("photoSetId") != null) {
 				String photoSetId = request.getParameter("photoSetId");
 				getAlbum(request,response,photoSetId);
+			} else if  (request.getParameter("invalidateAlbum") != null) {
+				String invalidateAlbum = request.getParameter("invalidateAlbum");
+				getAlbumSet(request,response,invalidateAlbum);	
 			} else {
-				getList(request,response);	
+				getAlbumSet(request,response,"12345");				
 			}
 		} catch(Exception ex) {
 		
@@ -73,11 +76,10 @@ public class AlbumProxy extends HttpServlet {
 	   }
     }
     
-    protected void getList(HttpServletRequest request, HttpServletResponse response) {
-    
+    protected void getAlbumSet(HttpServletRequest request, HttpServletResponse response, String invalidateId) {    
 		try { 
 		  Integration ppl = new Integration();
-		  String resStr = ppl.compileJsonResponse();
+		  String resStr = ppl.allPhotoSets(invalidateId);
 		  response.getWriter().println(resStr);
 	   } catch(Exception ex) {
 		   System.out.println(ex);

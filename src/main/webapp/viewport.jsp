@@ -42,15 +42,18 @@ $(document).ready(function ($) {
 		
 	var viewheight = $('body', window.parent.document).height();
 	
-	var hash = window.location.hash.substring(1);// === "" ? "72157646827612988" : window.location.hash; //setId
+	var hash = window.location.hash.substring(1);
 	var oSrc, oWidth, oHeight;	
-	var mSrc, mWidth, mHeight;	
+	var mSrc, mWidth, mHeight;
+	var photoEmpty = "15508109759";
+	var imgCt = 0;	
 
 	 $.getJSON('/flickr/albums?photoSetId='+hash, function(json) {
 		$.each(json,function(c, coll){
 		var htmlViewport = "";
 		var htmlCollage = "";
 		  $.each(coll, function(photoId, data) {
+		    if (photoId != photoEmpty) {	
 			$.each(data,function(size, crops){
 				if (size == 'Large') {
 					cSrc = crops.source;
@@ -66,7 +69,9 @@ $(document).ready(function ($) {
 					
 			htmlCollage += "<img src=\"" + mSrc +"\"  csource=\""+ cSrc + "\" />";
 			$("#viewWrapper").html(htmlViewport);
-			$("#collage").html(htmlCollage);	
+			$("#collage").html(htmlCollage);
+			imgCt++;	
+			}
 		  });
 	    });
 	  
@@ -75,11 +80,15 @@ $(document).ready(function ($) {
 		var liLast = $('#viewport ul li:last-child').width();
 	
 		var leftShift = center - (liFirst/2 + liLast);
-		$('#viewport ul').css({ left: leftShift });
 		$('#viewport ul li:first-child').fadeTo(100,1);
-    	$('#viewport ul li:last-child').prependTo('#viewport ul');
-    	    	
-    	//$("#collage").collagePlus('targetHeight': 260);
+		if (imgCt > 1){
+			$('#viewport ul').css({ left: leftShift });
+    		$('#viewport ul li:last-child').prependTo('#viewport ul');
+    	} else {
+    		$('#viewport ul').css({ left: center-liLast/2 });
+    		$("#canvas div > a").hide();
+    	}
+
 	});   
 
 	$("#canvas").on("click", "div > a.v_prev", function () {
