@@ -31,8 +31,8 @@
 					  <li class="toggle"><a href="#mobileNav" id="mobile-show-nav" class="icon-list"></a></li>
 						<li class="page-collection"><a href="#" id="introPage">About</a></li>
 						<li class="page-collection"><a href="#" id="viewSection">View</a></li>
-						<li class="page-collection"><a href="#" id="uploadSection">Upload</a></li>
-						<li class="page-collection active-link"><a href="#">Login</a></li>
+						<li class="page-collection active-link"><a href="#">Upload</a></li>
+						<li class="page-collection"><a href="#">Login</a></li>
 					</ul>
 				  </nav>
 			</div>
@@ -44,7 +44,7 @@
 		<iframe id="left" src="upload.jsp" scrolling="no">
 		</iframe>
 	
-		<iframe id="center" src="intro.jsp" scrolling="yes" name="viewportFrame">
+		<iframe id="center" src="intro.jsp" scrolling="no" name="viewportFrame">
 		</iframe>
 	
 	
@@ -67,11 +67,9 @@
     $("#introPage").on("click", function () {
 		$( '#center' ).attr( 'src', function ( i, val ) { return "http://"+$(location).attr('host') + "/intro.jsp"; });
     });
-    $("#uploadSection").on("click", function () {
-    	window.location.href = "http://"+$(location).attr('host') + "/index-upload.jsp";
-    });
+    
     $("#viewSection").on("click", function () {
-    	window.location.href = "http://"+$(location).attr('host') + "/view-upload.jsp";
+    	window.location.href = "http://"+$(location).attr('host') + "/index-view.jsp";
     });
 
 });   

@@ -4,10 +4,11 @@
 <link rel="stylesheet" type="text/css" href="/includes/site.css"/>
 
 </head>
-  <body style="padding: 50px 0 0 0;">
+  <body style="padding: 0 20px 0 0;">
 
 	<div id="wrapper">
-		<img src="/includes/hex-loader.gif"/>	
+		<h1 class="recently-updated">recently updated</h1>
+		<img class="loading-gif" src="/includes/hex-loader.gif"/>
 	</div>
 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
@@ -20,7 +21,7 @@
         	opacity: .75,
             left: +200
         }, 200, function () {
-        	for (var i = 0; i < 4; i++) {
+        	for (var i = 0; i < 2; i++) {
               $('div[name="' + sliderName + '"] section img:last-child').prependTo('div[name="' + sliderName + '"] section');
               $('div[name="' + sliderName + '"] section img:first-child').css('margin-right', '2px');
               $('div[name="' + sliderName + '"] section').fadeTo(200,1);
@@ -33,7 +34,7 @@
             opacity: .75,
             left: -200
         }, 200, function () {
-          for (var i = 0; i < 4; i++) {
+          for (var i = 0; i < 2; i++) {
             $('div[name="' + sliderName + '"] section img:first-child').appendTo('div[name="' + sliderName + '"] section');
             $('div[name="' + sliderName + '"] section img:last-child').css('margin-right', '2px');
             $('div[name="' + sliderName + '"] section').fadeTo(200,1);
@@ -41,14 +42,14 @@
         });
     };
     
-    $("#wrapper").on("click", "div > div > a.control_next", function () {
-        var parentTag = $(this).parent().get(0).getAttribute("name");
+    $("#wrapper").on("click", "div > div > span > a.control_next", function () {
+        var parentTag = $(this).parent().parent().get(0).getAttribute("name");
         moveRight(parentTag);
         return false;
     });
     
-    $("#wrapper").on("click", "div > div > a.control_prev", function () {
-        var parentTag = $(this).parent().get(0).getAttribute("name");
+    $("#wrapper").on("click", "div > div > span > a.control_prev", function () {
+        var parentTag = $(this).parent().parent().get(0).getAttribute("name");
         moveLeft(parentTag);
         return false;
     });
@@ -76,9 +77,11 @@
    		var html = "";
 		html += "<div id=\"sectionWrapper\" name=\""+ value.setId+"\">" +
 	    		"<div id=\"slider\" name=\""+ value.setId+"\">" +
-	  		    	"<a href=\"#\" class=\"control_next\">>></a>" +
-	  		    	"<a href=\"#\" class=\"control_prev\"> <<</a>" +
-			    	"<div class=\"albumTitle\">"+ value.setName+"</div>" +
+	    			"<div class=\"albumTitle\">"+ value.setYear+ " " + value.setName+"</div>" +
+	    			"<span class=\"nav-wrapper\">" + 
+	    			"<a href=\"#\" class=\"control_prev\">&#8672;</a>" +
+	    			"<span class=\"quick-view\">quick view</span>" +
+	  		    	"<a href=\"#\" class=\"control_next\">&#8674;</a></span>" +
 					"<section class=\"imgSet\">";
 		
 		console.log('length '+ value.setCount);
@@ -98,6 +101,7 @@
     });
   });
 });
+
 </script> 
   </body>
 </html>

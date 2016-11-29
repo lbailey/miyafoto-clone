@@ -86,6 +86,10 @@ body {
 h1 {
   color: #222;
 }
+
+h1.recently-updated {
+  padding-bottom: 30px;
+}
 h1.entry-title a,
 h1.entry-title a:visited {
   color: #222;
@@ -144,7 +148,8 @@ body {
 h1,
 h2,
 h3,
-h4 {
+h4, 
+h5 {
   margin: .75em 0;
   text-rendering: optimizeLegibility;
   font-family: Coustard, "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", serif;
@@ -159,8 +164,12 @@ h2 {
   font-size: 24px;
   line-height: 1.2em;
 }
-h4 {
+h4, h5 {
   font-size: 16px;
+}
+h5 {
+  text-align: right;
+  margin-right: 50px;
 }
 p {
   font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
@@ -266,49 +275,79 @@ nav ol {
   position: relative;
   min-width: 200px;
   max-width: 20%;
-  height: 1500px;
+  min-height: 1200px;
   overflow: hidden;
   margin-right: 10px;
 }
-#center {
+#center, #center-wide {
   border: none;
   position: relative;
   margin: 0 auto;
-  width: 40%;
   min-width: 300px;
-  height: 1500px;
+  min-height: 1200px;
   overflow: hidden;
+  top: -40px;
+}
+#center {
+  width: 60%;
+}
+#center-wide {
+  width: 75%;
+  padding: 0 20px;
 }
 #right {
   border: none;
   right: 0px;
   position: relative;
-  width: 35%;
-  min-width: 230px;
+  width: 15%;
+  min-width: 130px;
   float: right;
-  height: 1000px;
+  height: 640px;
   overflow-y: auto;
 }
 #sectionWrapper {
   margin-bottom: 30px;
+}
+#slider{
+  width: 154px;
 }
 .slideControls {
   white-space: nowrap;
   clear: both;
 }
 .albumTitle {
-  display: inline-block;
-  text-align: right;
-  float: right;
+  display: block;
+  text-align: center;
   cursor: pointer;
+  color: #78260c;
 }
 .albumTitle:hover {
   text-decoration: underline;
 }
 
+.control_prev {
+  float: left;
+}
+.control_next {
+  float: right;
+}
+
+.quick-view {
+  margin: 0 auto;
+  font-style: italic;
+}
+
+#slider .nav-wrapper {
+	display: inline-flex;
+    width: 100%;
+    padding-bottom: 5px;
+}
+
+
 #viewport {
   white-space: nowrap;
     overflow: hidden;
+    display: none;
 }
 #viewport ul {
   position: relative;
@@ -349,26 +388,11 @@ nav ol {
 
 #collage {
   padding:10px;
-  display: none;
 }
 
 #collage img {
   vertical-align:bottom;
   opacity:0;
-}
-
-.viewToggle {
-  float: right;
-}
-
-.viewToggle .slide {
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.viewToggle .grid {
-  font-weight: normal;
-  cursor: pointer;
 }
 
 a.grid:hover,
@@ -510,7 +534,7 @@ span.zoomed::before {
 /* TWEAK OPTIONS
 ***********************************************/
 .miyamoto {
-	background: url("miyamoto.png") no-repeat right bottom;
+
 }
 
 .black {
@@ -522,6 +546,8 @@ span.zoomed::before {
 
 .imgSet {
   white-space: nowrap;
+  overflow: hidden;
+  width: 154px;
 }
 .imgSet > img {
   display: inline;
@@ -535,7 +561,8 @@ span.zoomed::before {
 .helperText {
   text-transform: uppercase; 
   color:#78260c;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
+  margin-left: 20px;
 }
 .pad30 {
   margin-bottom: 30px;
@@ -545,8 +572,9 @@ span.zoomed::before {
   margin-bottom: 10px;
 }
 #accordian {
-  width: 250px;
+  width: 225px;
   margin: 0 auto;
+  padding-left: 20px;
 }
 
 #accordian p {
@@ -568,6 +596,7 @@ span.zoomed::before {
   display: block;
   padding: 0 25px;
   transition: all 0.15s;
+  text-transform: capitalize;
 }
 #accordian ul ul li a:hover {
   border-left: 5px solid #78260c;
@@ -577,6 +606,14 @@ span.zoomed::before {
 }
 #accordian li.active ul {
   display: block;
+}
+
+#accordian li p::before, #accordian li.inactive p::before {
+  content: "\002B\0020\0020";
+}
+
+#accordian li.active p::before {
+  content: "\2013\0020\0020";
 }
 
 #accordian ul li ul a.selected {
@@ -589,6 +626,31 @@ span.zoomed::before {
   color: #78260c;
   float: right;
   content: "  \221A";
+}
+#accordian ul li ul a.new-album, #accordian ul li ul a.new-album.selected {
+  font-style: italic;
+  color: grey;
+  background-color: #fff;
+  border-left: none;
+  text-transform: initial;
+}
+
+#accordian ul li > form {
+  display: none;
+  margin-bottom: 35px;
+  margin-right: 20px;
+}
+
+#accordian ul li > form > input{
+  float: right;
+  margin-left: 20px;
+}
+
+#accordian ul li ul a.new-album.selected::after {
+  font-weight: bold;
+  color: #78260c;
+  float: right;
+  content: "  \2026";
 }
 
 .ajax-upload-dragdrop {
@@ -680,6 +742,21 @@ margin-right:5px;
   background: #ddd;
 }
 
+.loading-gif {
+  width: 100%;
+}
+
+.circle { 
+   background: #cd483d; 
+   -moz-border-radius: 50%; 
+   -webkit-border-radius: 50%; 
+   position: relative;
+   border-radius: 50%;
+   width: 80%;
+   height: auto;
+   padding-top: 70%;
+   margin-top: 5%;
+}
 
 #header,
 #page,

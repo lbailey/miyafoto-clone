@@ -26,12 +26,15 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.LinkedHashMap;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.text.WordUtils;
 import org.json.JSONObject;
 import org.json.JSONArray;
 
@@ -52,6 +55,8 @@ import com.miyamoto.foto.service.photos.PhotoSet;
 
 public class Integration {
     
+    private static final String EMPTY_PHOTO = "15508109759";
+    
     private ImageMeta imageMeta;
     private OAuth authorized;
     private User user;
@@ -64,22 +69,48 @@ public class Integration {
 	public enum AlbumSetCache {
 		INSTANCE;
 		
-		private static Cache<String,PhotoSet> cache =
+		private static Cache<String,PhotoSet> setIdCache =
 				CacheBuilder.newBuilder()
-						.maximumSize(100)
+						.maximumSize(400)
 						.build();
-
+						
+		private static Cache<String,PhotoSet> titleCache =
+				CacheBuilder.newBuilder()
+						.maximumSize(50)
+						.build();				
+		
 		public void expireAndAdd(String photoSetId, PhotoSet photoSet) {
-			cache.invalidate(photoSetId);
-			cache.put(photoSetId, photoSet);
+			setIdCache.invalidate(photoSetId);
+			setIdCache.put(photoSetId, photoSet);
 		}
 
 		public boolean hasKey(String photoSetId) {
-			return cache.getIfPresent(photoSetId) == null ? false : true;
+			return setIdCache.getIfPresent(photoSetId) == null ? false : true;
 		}
 
 		public PhotoSet getPhotoSet(String photoSetId) {
-			return cache.getIfPresent(photoSetId);
+			return setIdCache.getIfPresent(photoSetId);
+		}
+		
+		public boolean hasTitles(){
+			return titleCache.size() > (long) 0 ? true : false;
+		}
+		
+		public boolean hasTitle(String title){
+			return titleCache.getIfPresent(title) == null ? false : true;
+		}
+		
+		public PhotoSet getByTitle(String title){
+			return titleCache.getIfPresent(title);
+		}
+		
+		public void addByTitle(String title, PhotoSet photoSet) {
+			titleCache.invalidate(title);
+			titleCache.put(title, photoSet);
+		}
+		
+		public ConcurrentMap<String,PhotoSet> getTitles() {
+			return titleCache.asMap();
 		}
 	}
 
@@ -151,6 +182,55 @@ public class Integration {
     
     //
     //
+    // Create Album/photoSet on Flickr: Tell Flickr to create a new Photo Set/Album with this name
+    //
+    //
+    public String createNewAlbum(String albumName, String albumPrefix) {
+    	
+    	Map<String, Object> parameters = new HashMap<String, Object>();
+		String albumTitle = albumPrefix + "-" + albumName.replaceAll(" ","-").toLowerCase(); //regex on name
+        
+//DO NOT        //parameters.put("title", albumTitle);
+//NEED        //parameters.put("primary_photo_id", EMPTY_PHOTO);
+        
+        System.out.println("Creating new album with title : "+albumTitle);
+        
+    	OAuthRequest request = new OAuthRequest(Verb.POST, "https://api.flickr.com/services/rest/");
+            	  
+        request.addHeader("Content-Type", "multipart/form-data; boundary=" + getMultipartBoundary());		
+		request.addQuerystringParameter("method", "flickr.photosets.create");
+		request.addQuerystringParameter("title", albumTitle);
+		request.addQuerystringParameter("description", WordUtils.capitalize(albumName)); //regex to make capitalized
+		request.addQuerystringParameter("primary_photo_id", EMPTY_PHOTO);
+               
+        Token requestToken = new Token(getAuthorize().getToken(), getAuthorize().getTokenSecret());
+        ServiceBuilder serviceBuilder = new ServiceBuilder().provider(FlickrApi.class).apiKey(getAuthorize().getApiKey()).apiSecret(getAuthorize().getSharedSecret());
+        OAuthService service = serviceBuilder.build();
+        
+        service.signRequest(requestToken, request);
+        
+        parameters.putAll(request.getOauthParameters());
+        request.addPayload(buildMultipartBody(parameters, getMultipartBoundary()));
+        
+        Response scribeResponse = request.send();
+        String strXml = scribeResponse.getBody();
+        
+        
+        String setId = strXml.replaceAll("\\n","").replaceAll("(.+id=\"|\".*)","");
+        String[] extraAlbumInfo = albumPrefix.split("-");
+
+        // Update title cache with new PhotoSet here. 
+        PhotoSet aPhotoSet = new PhotoSet(setId, albumTitle, WordUtils.capitalize(albumName), 1, "");
+		aPhotoSet.addSetYear(extraAlbumInfo[0]);
+		aPhotoSet.addSetType(extraAlbumInfo[1]);
+		AlbumSetCache.INSTANCE.addByTitle(albumTitle, aPhotoSet);
+		
+        return setId;
+    
+    }
+    
+    //
+    //
     // Post to Flickr: Tell Flickr to move image with specific ID to specific photo set with ID
     //
     //
@@ -183,6 +263,43 @@ public class Integration {
         return strXml;
     
     }
+    
+    //
+    //
+    // JSON: send list of albums by title-PhotoSet to use for side-navigation
+	// 
+	//    
+    public String albumListToJson(String selectedYear) {
+		JSONObject jsonObject = new JSONObject();							//invalTitle
+		TreeMap<String,PhotoSet> completeList = retrieveFlickrPhotoSets("year-type-title","title");
+	
+		JSONObject collObj = new JSONObject();
+		JSONArray typeArr = new JSONArray();
+		String prevType = "", currentType;
+		for (String album : completeList.keySet()) {			
+			if (album.startsWith(selectedYear)) {
+				currentType = completeList.get(album).getSetType();
+				prevType = prevType.isEmpty()? currentType : prevType;
+				if (!currentType.matches(prevType)) {
+				   collObj.put(prevType, typeArr);
+				   typeArr = new JSONArray();
+				}
+				
+				JSONObject setJson = new JSONObject();
+				PhotoSet ps = completeList.get(album);
+				setJson.put("setName", ps.getPhotoSetName());
+				setJson.put("setId", ps.getPhotoSetId());
+				setJson.put("setTitle", ps.getPhotoSetTitle());
+				setJson.put("setCount", ps.getPhotoSetCount());
+				typeArr.put(setJson);
+				prevType = currentType;
+			}
+		}
+		
+		jsonObject.put("result", collObj);		
+		return jsonObject.toString();           
+    }
+    
     
     //
     //
@@ -271,17 +388,16 @@ public class Integration {
     
     //
     //
-    // JSON: Calls a request to Flickr for a single PhotoSet (album)
+    // JSON: JSON writer helper for PhotoSet to JSON
     //
     //
-    public String specificPhotoSetJson(String setId) {
-		String photoJsonString = cleanJsonResponse(getPhotosOfSet(setId));
-		JSONObject photosJson = new JSONObject(photoJsonString);
-		
-		JSONObject setJson = new JSONObject();		//TODO: fill these values 
-		PhotoSet ps = parsePhotoSetResponse(setId, "", "", photoJsonString, "");
-		
-		// create descending iterator
+    public String psToJson(PhotoSet ps) {
+        JSONObject setJson = new JSONObject();		//TODO: fill these values 
+    	setJson.put("setTitle", ps.getPhotoSetTitle());
+    	setJson.put("setName", ps.getPhotoSetName());
+    	setJson.put("setYear", ps.getSetYear());
+    	
+    	// create descending iterator
      	Iterator<Photo> photosDescending = ps.getPhotoSet().descendingIterator();
 		
 			JSONObject photoJson = new JSONObject();
@@ -299,7 +415,37 @@ public class Integration {
 			}
 			setJson.put("photos", photoJson);
 				
-		return setJson.toString();           
+		return setJson.toString();  
+    }
+    
+    //
+    //
+    // JSON: Calls a request to Flickr for a single PhotoSet (album)
+    //
+    //
+    public String specificPhotoSetJson(String setId) {
+		String photoJsonString = cleanJsonResponse(getPhotosOfSet(setId));
+		JSONObject photosJson = new JSONObject(photoJsonString);
+		
+		PhotoSet ps = parsePhotoSetResponse(setId, "", "", photoJsonString, ""); // missing pieces filled by cache
+		
+		return psToJson(ps);
+		         
+    }
+    
+    //
+    //
+    // JSON: Uses cache to return a single/specific PhotoSet (album)
+    //
+    //
+    public String specificCachePhotoSetJson(String setId) {
+    	PhotoSet aPhotoSet;
+		if (AlbumSetCache.INSTANCE.hasKey(setId)) {
+			aPhotoSet = AlbumSetCache.INSTANCE.getPhotoSet(setId);
+			return psToJson(aPhotoSet);
+		} else {
+			return specificPhotoSetJson(setId);
+		}
     }
     
     //
@@ -309,7 +455,7 @@ public class Integration {
     //
     public String allPhotoSets(String invalidateId) {
 		JSONObject jsonObject = new JSONObject();
-		TreeMap<String,PhotoSet> completeStuff = retrieveFlickrPhotoSets(invalidateId);
+		TreeMap<String,PhotoSet> completeStuff = retrieveFlickrPhotoSets(invalidateId, "id");
 	
 		JSONArray collArray = new JSONArray();
 		
@@ -320,6 +466,7 @@ public class Integration {
 			setJson.put("setId", ps.getPhotoSetId());
 			setJson.put("setTitle", ps.getPhotoSetTitle());
 			setJson.put("setCount", ps.getPhotoSetCount());
+			setJson.put("setYear", ps.getSetYear());
 			
 			// create descending iterator
      		Iterator<Photo> photosDescending = ps.getPhotoSet().descendingIterator();
@@ -355,7 +502,11 @@ public class Integration {
 		JSONObject photosObject = photosJson.getJSONObject("photoset");
 		
 		int photoCount = Integer.parseInt(photosObject.get("total").toString());
-		PhotoSet aPhotoSet = new PhotoSet(setId, setTitle, setDesc, photoCount, dateOfSet);
+		String photoSetTitle = photosObject.get("title").toString();
+		
+		PhotoSet aPhotoSet = AlbumSetCache.INSTANCE.hasTitle(photoSetTitle) ? 
+							 AlbumSetCache.INSTANCE.getByTitle(photoSetTitle) :
+							 new PhotoSet(setId, setTitle, setDesc, photoCount, dateOfSet);
 					
 		JSONArray photosArr = photosObject.getJSONArray("photo");
 		
@@ -380,6 +531,7 @@ public class Integration {
 			aPhoto.addLargeCrop(url_c, "800", "600");
 			aPhotoSet.addPhotoToSet(aPhoto);  
 		}
+		
     	return aPhotoSet;
     }
     
@@ -390,9 +542,17 @@ public class Integration {
     // Uses Google cache to speed up PhotoSet query responses
     //
     //
-    public TreeMap<String,PhotoSet> retrieveFlickrPhotoSets(String invalidateId) {
-    		
-    	TreeMap<String,PhotoSet> entireCollection = new TreeMap<String,PhotoSet>();		
+    public TreeMap<String,PhotoSet> retrieveFlickrPhotoSets(String invalidate, String cacheType) {
+    	
+    	TreeMap<String,PhotoSet> entireCollection = new TreeMap<String,PhotoSet>();
+    	
+    	//speed up if keys are in cache for cacheType "title"
+    	if (cacheType.equalsIgnoreCase("title") && AlbumSetCache.INSTANCE.hasTitles() &&
+    			!invalidate.equalsIgnoreCase("invalidate")) {
+    		entireCollection.putAll(AlbumSetCache.INSTANCE.getTitles());
+    		return entireCollection;
+    	}
+    				
 		long pslS = System.nanoTime();
     	String photoSetListString = cleanJsonResponse(getPhotoSetList()); //can't speed up
 		long pslE = System.nanoTime();
@@ -413,17 +573,42 @@ public class Integration {
 			String dateUpdate =  photoSetOne.get("date_update").toString();                    // <--- order! long date val
 			String setTitle = photoSetOne.getJSONObject("title").get("_content").toString();
 			String setDesc = photoSetOne.getJSONObject("description").get("_content").toString();
+			String setYear = setTitle.replaceAll("-.+","");
+			String setType = setTitle.split("-")[1];
+			int count = (Integer)photoSetOne.get("photos");
 			
 			PhotoSet aPhotoSet;
-			if (AlbumSetCache.INSTANCE.hasKey(setId) && !invalidateId.equals(setId)) {
-				aPhotoSet = AlbumSetCache.INSTANCE.getPhotoSet(setId);
-			} else {
-				String photoJsonString = cleanJsonResponse(getPhotosOfSet(setId)); // Only do if cache is empty
-				aPhotoSet = parsePhotoSetResponse(setId, setTitle, setDesc, photoJsonString, dateUpdate);
-				AlbumSetCache.INSTANCE.expireAndAdd(setId, aPhotoSet);							
+			
+			//
+			// If we are invalidating a specific photoSetId in the complete indv cache
+			//
+			if (cacheType.equalsIgnoreCase("id")){
+				if (AlbumSetCache.INSTANCE.hasKey(setId) && !invalidate.equals(setId)) {
+					aPhotoSet = AlbumSetCache.INSTANCE.getPhotoSet(setId);
+				} else {
+					String photoJsonString = cleanJsonResponse(getPhotosOfSet(setId)); // Only do if cache is empty
+					aPhotoSet = parsePhotoSetResponse(setId, setTitle, setDesc, photoJsonString, dateUpdate);
+					aPhotoSet.addSetYear(setYear);
+					aPhotoSet.addSetType(setType);
+					AlbumSetCache.INSTANCE.expireAndAdd(setId, aPhotoSet);							
+				}
+				entireCollection.put(aPhotoSet.getDateUpdated(), aPhotoSet);
+			
+			//
+			// If we are invalidating the list version for menu/navigation
+			//	
+			} else if (cacheType.equalsIgnoreCase("title")) {
+				if (AlbumSetCache.INSTANCE.hasTitle(setTitle)) {
+					aPhotoSet = AlbumSetCache.INSTANCE.getByTitle(setTitle);
+				} else {
+					aPhotoSet = new PhotoSet(setId, setTitle, setDesc, count, dateUpdate);
+					aPhotoSet.addSetYear(setYear);
+					aPhotoSet.addSetType(setType);
+					AlbumSetCache.INSTANCE.addByTitle(setTitle, aPhotoSet);							
+				}			
+				entireCollection.put(aPhotoSet.getPhotoSetTitle(), aPhotoSet);
 			}
-
-			entireCollection.put(aPhotoSet.getDateUpdated(), aPhotoSet);   
+   
         }
 		
 		long plE = System.nanoTime();
@@ -432,6 +617,7 @@ public class Integration {
 
     	return entireCollection;
     }
+    
     
     //
     //

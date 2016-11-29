@@ -6,73 +6,11 @@
 </head>
   
 <body>
-<p class="helperText pad30">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select an Album . . .</p>
+<p class="helperText pad30">Upload to Album</p>
+<div id="albumYearSelect"><span class="helperText">Year: </span></div>
 <div id="accordian" name="photoSets">
 	<ul>
-		<li>
-			<p><span class="icon-tasks"></span>Athletic</p>
-			<ul>
-				<li><a href="#" photoSetId="72157648683693719">Badman Events</a></li>
-				<li><a href="#" photoSetId="72157646772374793">Badgirl Events</a></li>
-			</ul>
-		</li>
-		<li class="active">
-			<p><span class="icon-dashboard"></span>Festival</p>
-			<ul>
-				<li><a href="#" photoSetId="72157648683096147">Spring Fest</a></li>
-				<li><a href="#" photoSetId="72157648684846708">Awa Odori</a></li>
-				<li><a href="#" photoSetId="72157648684796828">Bon Odori</a></li>
-			</ul>
-		</li>
-		<li>
-			<p><span class="icon-tasks"></span>Formal</p>
-			<ul>
-				<li><a href="#" photoSetId="72157648683737159">Badgirl Octoberfest Ball</a></li>
-			    <li><a href="#" photoSetId="72157649102848015">Change of Command</a></li>
-				<li><a href="#" photoSetId="72157649091148702">Badman Ball</a></li>
-				<li><a href="#" photoSetId="72157648683131097">Badgirl Miss Universe Ball</a></li>
-				<li><a href="#" photoSetId="72157648692195938">Christmas Mask at New Sanno</a></li>
-			</ul>
-		</li>
-		<li>
-			<p><span class="icon-calendar"></span>Social</p>
-			<ul>
-				<li><a href="#" photoSetId="72157648690945630">OSC Treat Exchange</a></li>
-				<li><a href="#" photoSetId="72157649090185101">Squadron Treat Drop</a></li>
-				<li><a href="#" photoSetId="72157649036603486">MWR Trips</a></li>
-				<li><a href="#" photoSetId="72157649090206761">All-Spouse Events</a></li>
-				<li><a href="#" photoSetId="72157649036628026">Dinners & Drinks</a></li>
-			</ul>
-		</li>
-		<li>
-			<p><span class="icon-heart"></span>Shower</p>
-			<ul>
-				<li><a href="#" photoSetId="72157649102927455">Bethany</a></li>
-				<li><a href="#" photoSetId="72157649090230061">Kaitlin</a></li>
-				<li><a href="#" photoSetId="72157648692319738">Teena</a></li>
-				<li><a href="#" photoSetId="72157648692265598">Andrea</a></li>
-			</ul>
-		</li>
-		<li>
-			<p><span class="icon-heart"></span>Holiday</p>
-			<ul>
-				<li><a href="#" photoSetId="72157648683909119">Feed the Sailors</a></li>
-				<li><a href="#" photoSetId="72157648692349318">Christmas Luau</a></li>
-				<li><a href="#" photoSetId="72157648683936719">Christmas Ugly Sweater</a></li>
-				<li><a href="#" photoSetId="72157646772620263">Christmas Spouse Party</a></li>
-				<li><a href="#" photoSetId="72157649091340772">Christmas Tree Decorating</a></li>
-				<li><a href="#" photoSetId="72157648683354757">Secret Santa Reveal</a></li>
-			</ul>
-		</li>
-		<li>
-			<p><span class="icon-heart"></span>Misc</p>
-			<ul>
-				<li><a href="#" photoSetId="72157648692389178">OSC Gatherings</a></li>
-				<li><a href="#" photoSetId="72157648692394138">Hail & Farewell</a></li>
-				<li><a href="#" photoSetId="72157649090368331">Friends & Family</a></li>
-				<li><a href="#" photoSetId="72157649090373231">Uncategorized</a></li>
-			</ul>
-		</li>
+		
 	</ul>
 </div>
 
@@ -93,22 +31,78 @@
   
   var photoSetId;  
 $(document).ready(function(){
-	$("#accordian p").click(function(){
+	
+	var minOffset = 0, maxOffset = 7; // Change to whatever you want
+	var thisYear = (new Date()).getFullYear();
+	var select = $('<select id="albumYear">');
+
+	for (var i = minOffset; i <= maxOffset; i++) {
+    	var year = thisYear - i;
+    	$('<option>', {value: year, text: year}).appendTo(select);
+	}
+	select.appendTo('#albumYearSelect');
+	
+	
+	$("#albumYearSelect").bind("change", function(){
+		$("#accordian > ul").empty(); 
+		var year = $("#albumYearSelect").find(":selected").text();
+		console.log( year);
+		$.getJSON('/flickr/albums?albumYear='+year, function(json) {
+		  $.each(json,function(c, coll){
+			$.each(coll, function(photoType, photoSet) {
+			  var html = "<li><p>" + photoType + "</p><ul>";      
+			  $.each(photoSet, function(i, album) {   
+				html += "<li><a href=\"#\" photoSetId=\""+album.setId+"\">"+album.setName+"</a></li>";             
+			  });
+		 
+			  html += "<li><a href=\"#\" class=\"new-album\">add new album</a><form class=\"new-album-form\" " + 
+						"action=\"/flickr/albums\"><input type=\"submit\" value=\"add\"><input type=\"text\" " +
+						"name=\"albumName\"></form></li>";
+			  html += "</ul></li>";
+		
+			  $("#accordian > ul").append(html);   
+			  $("#accordian > ul > li:nth-child(2) > p").next().slideDown();		
+			});
+		  });
+		});
+		return false;
+	});	
+	
+	$('#albumYearSelect').trigger('change');
+
+	
+	$("#accordian").on("click", "ul > li > p", function(){
 		$("#accordian ul ul").slideUp();
+		$("#accordian ul li").removeClass("active");
 		if(!$(this).next().is(":visible")) {
 			$(this).next().slideDown();
-		}
+			$(this).parent().addClass("active");
+		} 
 		return false;
 	});
-	
-	$("#accordian ul li ul li a").click(function() {
-		$('.selected').removeClass('selected');
+
+
+	$("#accordian").on("click", "ul > li > ul > li > a.new-album", function () {
+		$('.selected').removeClass('selected');				
 		$(this).addClass('selected');
-		$('#ajax-upload').css({"display":"block"});
-		photoSetId = $(this).attr('photoSetId');
-		return false;
-	});
-	
+		$(this).next().fadeIn(200);
+		return false;      
+    });
+    
+    
+	$("#accordian").on("click", "ul > li > ul > li > a", function () {
+		$('#ajax-upload').css({"display":"none"});
+		photoSetId = "";
+		$('.selected').removeClass('selected');				
+		$(this).addClass('selected');
+		if (!$(this).hasClass('new-album')) {
+		  $('#ajax-upload').css({"display":"block"});
+		  photoSetId = $(this).attr('photoSetId');
+		  $('.new-album-form').hide();
+		} 
+		return false;     
+    });
+        	
 	var settings = {
     url: "/flickr/upload",
     method: "POST",
@@ -134,12 +128,49 @@ $(document).ready(function(){
 		console.log(folders.src);
 		folders.contentWindow.location.reload();
 		folders.src = folders.src;
+		
     },
     onError: function(files,status,errMsg) {        
         $("#status").html("<font color='red;margin-left:15px;'>Upload failed</font>");
-    }
-}
-$("#mulitplefileuploader").uploadFile(settings);
+    }}
+    
+    
+    $("#mulitplefileuploader").uploadFile(settings);
+    
+    //
+    // might not be able to do
+    //
+	function loadCenter() {
+    	var viewport = window.parent.document.getElementById('center');
+		viewport.src = "http://"+$(location).attr('host') + "/viewport.jsp#"+photoSetId;
+		console.log(viewport.src);
+		viewport.contentWindow.location.reload();
+		viewport.src = viewport.src;
+	}
+    
+    
+    $("#accordian").on("submit", "ul > li > ul > li > form.new-album-form", function () {
+    	console.log('here');
+		event.preventDefault();
+		var $form = $(this),
+			$list = $form.parents().eq(2),
+    		albumEntry = $form.find("input[name='albumName']").val(),
+    		albumPrefix = $('#albumYear').val() + "-" + $list.children('p').text().toLowerCase(),
+    		url = $form.attr("action");
+    		
+    	console.log(albumPrefix + " " + albumEntry);
+ 
+  		var newAlbum = $.post(url, {"albumName": albumEntry, "albumPrefix": albumPrefix});
+
+  		newAlbum.done(function(data) {
+    		var setId = data;
+			$form.fadeOut(400);
+  			$('a.new-album.selected').removeClass('selected');
+  			$list.children('ul').find(' > li:nth-last-child(1)').before('<li><a href="#" photoSetId="'+ setId +'" class="selected">'+albumEntry+'</a></li>');
+  			$('#ajax-upload').css({"display":"block"});
+		  	photoSetId = setId;
+  		});
+	});
 });
 
   </script>

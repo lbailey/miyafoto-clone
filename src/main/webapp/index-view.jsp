@@ -30,9 +30,9 @@
 					<ul id="siteNav">
 					  <li class="toggle"><a href="#mobileNav" id="mobile-show-nav" class="icon-list"></a></li>
 						<li class="page-collection"><a href="#" id="introPage">About</a></li>
-						<li class="page-collection"><a href="#" id="viewSection">View</a></li>
+						<li class="page-collection active-link"><a href="#" id="viewSection">View</a></li>
 						<li class="page-collection"><a href="#" id="uploadSection">Upload</a></li>
-						<li class="page-collection active-link"><a href="#">Login</a></li>
+						<li class="page-collection"><a href="#">Login</a></li>
 					</ul>
 				  </nav>
 			</div>
@@ -41,15 +41,11 @@
 
 	<!--<img src="http://i184.photobucket.com/albums/x172/DavidAtwell/sourcegradient.png" style="right: 0px; position: absolute; z-index:101;"/>-->
 	<div id="frameWrapper">
-		<iframe id="left" src="upload.jsp" scrolling="no">
+		<iframe id="left" src="viewlist.jsp" scrolling="no">
 		</iframe>
 	
-		<iframe id="center" src="intro.jsp" scrolling="yes" name="viewportFrame">
+		<iframe id="center-wide" src="rss.jsp" scrolling="no" name="viewportFrame">
 		</iframe>
-	
-	
-		<iframe id="right" src="folders.jsp" onload="resizeIframe(this)" scrolling="yes" name="fileFrame">
-		</iframe> 
 	</div>
 
 
@@ -63,15 +59,15 @@
 <script type="text/javascript">
 //  document.domain = "miyafoto";
   $(document).ready(function ($) {
+  
+  	$.getJSON('/flickr/albums?invalidateAlbum=', function(json) {});
 
     $("#introPage").on("click", function () {
-		$( '#center' ).attr( 'src', function ( i, val ) { return "http://"+$(location).attr('host') + "/intro.jsp"; });
+		$( '#center-wide' ).attr( 'src', function ( i, val ) { return "http://"+$(location).attr('host') + "/intro.jsp"; });
     });
+    
     $("#uploadSection").on("click", function () {
     	window.location.href = "http://"+$(location).attr('host') + "/index-upload.jsp";
-    });
-    $("#viewSection").on("click", function () {
-    	window.location.href = "http://"+$(location).attr('host') + "/view-upload.jsp";
     });
 
 });   

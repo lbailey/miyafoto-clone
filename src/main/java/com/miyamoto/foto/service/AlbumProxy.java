@@ -53,8 +53,11 @@ public class AlbumProxy extends HttpServlet {
 			} else if  (request.getParameter("invalidateAlbum") != null) {
 				String invalidateAlbum = request.getParameter("invalidateAlbum");
 				getAlbumSet(request,response,invalidateAlbum);	
+			} else if (request.getParameter("albumYear") != null) {		
+				String photoYear = request.getParameter("albumYear");
+				getAlbumList(request, response, photoYear);		
 			} else {
-				getAlbumSet(request,response,"12345");				
+				getAlbumList(request,response,"2016");
 			}
 		} catch(Exception ex) {
 		
@@ -65,16 +68,35 @@ public class AlbumProxy extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {		
 
 		try { 
-		  String photoSetId = request.getParameter("photoSetId");
-          String photoId = request.getParameter("photoId");
-		  Integration ppl = new Integration();
-		  String resStr = ppl.moveToAlbum(photoSetId, photoId);
-		  System.out.println(resStr);
-		  response.getWriter().println(resStr);
+			if (request.getParameter("photoSetId") != null && request.getParameter("photoId") != null) {
+		  		String photoSetId = request.getParameter("photoSetId");
+          		String photoId = request.getParameter("photoId");
+		  		Integration ppl = new Integration();
+		  		String resStr = ppl.moveToAlbum(photoSetId, photoId);
+		  		System.out.println(resStr);
+		  		response.getWriter().println(resStr);	
+		  	} else if (request.getParameter("albumName") != null && request.getParameter("albumPrefix") != null) {
+		  		String albumName = request.getParameter("albumName");
+		  		String albumPrefix = request.getParameter("albumPrefix"); // "year" and "category" e.g. "2014-formal"
+		  		Integration ppl = new Integration();
+		  		String albumPhotoSetId = ppl.createNewAlbum(albumName, albumPrefix);
+		  		response.getWriter().println(albumPhotoSetId);
+		  	}
 	   } catch(Exception ex) {
 		   System.out.println(ex);
 	   }
     }
+    
+    protected void getAlbumList(HttpServletRequest request, HttpServletResponse response, String year) {    
+		try { 
+		  Integration ppl = new Integration();
+		  String resStr = ppl.albumListToJson(year);
+		  response.getWriter().println(resStr);
+	   } catch(Exception ex) {
+		   System.out.println(ex);
+	   }
+
+    }    
     
     protected void getAlbumSet(HttpServletRequest request, HttpServletResponse response, String invalidateId) {    
 		try { 
@@ -91,7 +113,8 @@ public class AlbumProxy extends HttpServlet {
     
 		try { 
 		  Integration ppl = new Integration();
-		  String resStr = ppl.specificPhotoSetJson(photoSetId);
+		  //String resStr = ppl.specificPhotoSetJson(photoSetId);
+		  String resStr = ppl.specificCachePhotoSetJson(photoSetId);
 		  response.getWriter().println(resStr);
 	   } catch(Exception ex) {
 		   System.out.println(ex);

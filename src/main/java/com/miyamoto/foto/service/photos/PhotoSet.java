@@ -37,11 +37,13 @@ import com.miyamoto.foto.service.photos.Crop.Label;
 public class PhotoSet implements Comparator<Photo>{
 
 	private int photoSetCount;
-    private TreeSet<Photo> photoSet;    
+    private LinkedList<Photo> photoSet;    
     private String photoSetId,
     			   photoSetTitle,
     			   photoSetName,
-    			   photoSetDateUpdate;
+    			   photoSetDateUpdate,
+    			   photoSetType,
+    			   photoSetYear;
 
     public PhotoSet(String id, String title, String name, int count, String date) {
     	this.photoSetId = id;
@@ -49,19 +51,19 @@ public class PhotoSet implements Comparator<Photo>{
     	this.photoSetName = name;
     	this.photoSetCount = count;
     	this.photoSetDateUpdate = date;
-    	this.photoSet = new TreeSet<Photo>();
+    	this.photoSet = new LinkedList<Photo>();
     }
     
     @Override
 	public int compare(Photo thisPhoto, Photo diffPhoto) {
-        return thisPhoto.getUpdated() - diffPhoto.getUpdated();
+        return thisPhoto.getPhotoId().compareTo(diffPhoto.getPhotoId());
     }
     
     public void addPhotoToSet(Photo aPhoto) {
     	this.photoSet.add(aPhoto);
     }
 
-	public TreeSet<Photo> getPhotoSet() {
+	public LinkedList<Photo> getPhotoSet() {
 		return photoSet;
 	}
 	
@@ -87,5 +89,25 @@ public class PhotoSet implements Comparator<Photo>{
 			
 	public int getPhotoCount() {
 		return photoSetCount;
+	}
+	
+	public void addSetType(String setType) {
+		this.photoSetType = setType;	// used for text album list/organization
+	}
+	
+	public String getSetType() {
+		return photoSetType;
+	}
+		
+	public void addSetYear(String setYear) {
+		this.photoSetYear = setYear;
+	}
+	
+	public String getSetYear() {
+		return photoSetYear;
+	}
+	
+	public int getPhotoSetSize() {
+		return photoSet.size();
 	}
 }
