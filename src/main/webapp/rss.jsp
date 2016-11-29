@@ -42,7 +42,6 @@ $(document).ready(function ($) {
     	success:    function(data){
     	  $.each(data.items, function(k, val) {
     	  	$.each(val.media, function(m, mUrl) {
-    	  	  console.log(mUrl);
     	  	  htmlCollage += "<img src=\"" + mUrl.replace("_m.","_z.") +"\" />";
 			  imgCt++;
     	    });

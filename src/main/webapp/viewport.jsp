@@ -38,7 +38,7 @@ $(document).ready(function ($) {
 	var imgCt = 0;	
 	
 	var setName, setYear;
-
+/*
     $.getJSON('/flickr/albums?photoSetId='+hash, function(json) {
       	
       setName = json.setName;
@@ -67,7 +67,39 @@ $(document).ready(function ($) {
 		$("#albumTitleInfo").html(setYear+ " " + setName);
 	  
 	});
-	
+*/
+    $.ajax({
+        url: '/flickr/albums?photoSetId='+hash,
+        dataType:   "json",
+    	success:    function(json){
+	  	
+		  setName = json.setName;
+		  setYear = json.setYear;
+		  var htmlCollage = "";
+		
+			$.each(json.photos, function(photoId, data) {
+				if (photoId != photoEmpty) {	
+				$.each(data,function(size, crops){
+					if (size == 'Large') {
+						cSrc = crops.source;
+					}
+					if (size === 'Medium') {
+						mSrc = crops.source;
+						mWidth = crops.width;
+						mHeight = crops.height;
+					}
+				});
+					
+				htmlCollage += "<img src=\"" + mSrc +"\"  csource=\""+ cSrc + "\" />";
+				imgCt++;	
+				} 			
+			  }); 
+		  
+			$("#collage").html(htmlCollage);
+			$("#albumTitleInfo").html(setYear+ " " + setName);
+		}
+    });	
+    
 	$("#canvas").on("click", "div > ul > li", function (event) {
 		event.preventDefault();
 

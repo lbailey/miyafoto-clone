@@ -46,7 +46,6 @@ $(document).ready(function(){
 	$("#albumYearSelect").bind("change", function(){
 		$("#accordian > ul").empty(); 
 		var year = $("#albumYearSelect").find(":selected").text();
-		console.log( year);
 		$.getJSON('/flickr/albums?albumYear='+year, function(json) {
 		  $.each(json,function(c, coll){
 			$.each(coll, function(photoType, photoSet) {

@@ -71,7 +71,7 @@
     	window.location.href = "http://"+$(location).attr('host') + "/index-upload.jsp";
     });
     $("#viewSection").on("click", function () {
-    	window.location.href = "http://"+$(location).attr('host') + "/view-upload.jsp";
+    	window.location.href = "http://"+$(location).attr('host') + "/index-view.jsp";
     });
 
 });   
