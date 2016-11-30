@@ -99,6 +99,7 @@ $(document).ready(function ($) {
 		  
 			$("#collage").html(htmlCollage);
 			$("#albumTitleInfo").html(setYear+ " " + setName);
+			$("#albumTitleInfo").css({visibility:"visible"});
 		}/*, complete: function() {
 		setTimeout(collage, 100);
 		}*/
@@ -146,10 +147,12 @@ function collage() {
 	$(".loading-gif").hide();
     $("#collage").collagePlus({'targetHeight': 300, 'direction': 'horizontal', 'allowPartialLastRow': true });		
     if ($("#canvas").height() > 1200) {
-      var height = $("#canvas").css("height");
-      $("#left",parent.document).css("height", height);
-      $("#center",parent.document).css("height", height);
-      $("#center-wide",parent.document).css("height", height);
+      //var height = $("#canvas").css("height");
+      var height = $("#canvas").height() + 42; //the answer to the universe
+      $("#left",parent.document).css("height", height + "px");
+      $("#center",parent.document).css("height", height+ "px");
+      $("#center-wide",parent.document).css("height", height+ "px");
+      $("#right",parent.document).css("height", (height+ 110) + "px");
     }
 };
 

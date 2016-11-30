@@ -4,10 +4,10 @@
 <link rel="stylesheet" type="text/css" href="/includes/site.css"/>
 
 </head>
-  <body style="padding: 0 20px 0 0;">
+  <body style="padding: 0px; width: 150px; margin: auto; padding-right: 3px;">
 
 	<div id="wrapper">
-		<h1 class="recently-updated">recently updated</h1>
+		<h5 class="recently-updated">recent</h5>
 		<img class="loading-gif" src="/includes/hex-loader.gif"/>
 	</div>
 
@@ -101,6 +101,11 @@
 		}
     });
   });
+});
+
+$(window).bind('load', function() {
+    var height = $(window.parent.document).height() + 100;
+    $("#right",parent.document).css("height", height + "px"); // I've moved up the right div, account for it
 });
 
 </script> 

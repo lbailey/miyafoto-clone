@@ -25,7 +25,7 @@
 
     		<header id="header">
     		<h2>miya<span class="add">moto</span>-foto</h2>
-			  <div id="topNav"  data-content-field="navigation-navigation">
+			  <div id="topNav"  data-content-field="navigation-navigation" style="margin-right: 20%">
 				  <nav class="main-nav">
 					<ul id="siteNav">
 					  <li class="toggle"><a href="#mobileNav" id="mobile-show-nav" class="icon-list"></a></li>

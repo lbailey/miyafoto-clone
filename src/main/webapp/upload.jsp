@@ -128,6 +128,7 @@ $(document).ready(function(){
 		folders.contentWindow.location.reload();
 		folders.src = folders.src;
 		
+		loadCenter();
     },
     onError: function(files,status,errMsg) {        
         $("#status").html("<font color='red;margin-left:15px;'>Upload failed</font>");
@@ -141,7 +142,7 @@ $(document).ready(function(){
     //
 	function loadCenter() {
     	var viewport = window.parent.document.getElementById('center');
-		viewport.src = "http://"+$(location).attr('host') + "/viewport.jsp#"+photoSetId;
+		viewport.src = "http://"+$(location).attr('host') + "/success.jsp";
 		console.log(viewport.src);
 		viewport.contentWindow.location.reload();
 		viewport.src = viewport.src;

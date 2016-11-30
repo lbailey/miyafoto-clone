@@ -57,7 +57,8 @@ $(document).ready(function ($) {
 function collage() {
     $("#collage").collagePlus({'targetHeight': 300, 'direction': 'horizontal', 'allowPartialLastRow': true });
     if ($("#canvas").height() > 1200) {
-      var height = $("#canvas").css("height");
+      //var height = $("#canvas").css("height");
+      var height = $("#canvas").height() + 42; //the answer to the universe
       $("#left",parent.document).css("height", height);
       $("#center-wide",parent.document).css("height", height);
     }

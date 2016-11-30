@@ -3,6 +3,7 @@ html {
   font-size: 100%;
   -webkit-text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
+  height: 100%;
 }
 body {
   margin: 0;
@@ -87,8 +88,12 @@ h1 {
   color: #222;
 }
 
-h1.recently-updated {
-  padding-bottom: 30px;
+h5.recently-updated {
+    padding: 40px 0;
+    font-size: 11pt;
+    margin: 0 auto;
+
+    text-align: center;
 }
 h1.entry-title a,
 h1.entry-title a:visited {
@@ -164,12 +169,20 @@ h2 {
   font-size: 24px;
   line-height: 1.2em;
 }
-h4, h5 {
+h4 {
   font-size: 16px;
 }
 h5 {
-  text-align: right;
-  margin-right: 50px;
+text-align: left;
+    margin-left: 10px;
+  font-family: "Open Sans";
+  font-size: 13px;
+  line-height: 2em;
+  text-transform: uppercase;
+  text-decoration: none;
+  letter-spacing: 2px;
+  font-weight: 400;
+  font-style: normal;
 }
 p {
   font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
@@ -183,6 +196,8 @@ p {
   font-weight: 300;
   font-style: normal;
   margin: 0 0 1em;
+  letter-spacing: .2px;
+  word-spacing: .5px;
 }
 
 ul,
@@ -239,7 +254,7 @@ nav ol {
 #canvas {
   max-width: 100%;
   margin: 0 auto;
-  padding: 20px 20px 20px 20px;
+  padding: 20px 20px 0 20px;
   position: relative;
 }
 
@@ -300,10 +315,12 @@ nav ol {
   right: 0px;
   position: relative;
   width: 15%;
-  min-width: 130px;
+  min-width: 170px;
   float: right;
   height: 640px;
   overflow-y: auto;
+  top: -100px;
+  background: #eee;
 }
 #sectionWrapper {
   margin-bottom: 30px;
@@ -323,6 +340,11 @@ nav ol {
 }
 .albumTitle:hover {
   text-decoration: underline;
+}
+
+#albumTitleInfo {
+  visibility: hidden;
+  display: block;
 }
 
 .control_prev {
@@ -580,6 +602,7 @@ span.zoomed::before {
 #accordian p {
   cursor: pointer;
   text-transform: uppercase;
+    letter-spacing: 1px;
 }
 #accordian p:hover {
   text-shadow: 0 0 1px rgba(255, 255, 255, 0.7);
@@ -597,6 +620,7 @@ span.zoomed::before {
   padding: 0 25px;
   transition: all 0.15s;
   text-transform: capitalize;
+  letter-spacing: .2px;
 }
 #accordian ul ul li a:hover {
   border-left: 5px solid #78260c;
@@ -746,6 +770,27 @@ margin-right:5px;
   max-width: 100%;
   margin: 0 auto;
   display: block;
+}
+
+div.upload-success {
+  font-size: 12pt;
+  width: 180px;
+  margin: 90px auto;
+  display: none;
+}
+div.upload-success img {
+  width: 100%;
+}
+
+div.upload-success span {
+font-size: 12pt;
+    text-transform: uppercase;
+    font-family: open sans-serif;
+    letter-spacing: 2px;
+    color: green;
+    margin: 30px auto;
+    width: 95px;
+    display: block;
 }
 
 .circle { 
