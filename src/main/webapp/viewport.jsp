@@ -11,6 +11,7 @@
 		
 		<div id="canvasScrollbar" style="overflow-y: auto; overflow-x: hidden;">
 		  <h5 id="albumTitleInfo"></h5>
+		  <img class="loading-gif" src="/includes/hex-loader.gif"/>
 		  <div id="collage"></div>
 		  <!--<img src="/includes/hex-loader.gif"/>	-->
 		</div><!-- / #canvasScrollbar -->
@@ -20,8 +21,8 @@
  
 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-<script src="/includes/jquery.collagePlus.js"></script>
 <script src="/includes/jquery.collagePlus.min.js"></script>
+<!--<script src="/includes/jquery.collagePlus.js"></script>-->
 <script type="text/javascript">
   //document.domain = "miyafoto";  
 $(document).ready(function ($) {
@@ -68,6 +69,8 @@ $(document).ready(function ($) {
 	  
 	});
 */
+	var htmlCollage = "";
+
     $.ajax({
         url: '/flickr/albums?photoSetId='+hash,
         dataType:   "json",
@@ -75,7 +78,6 @@ $(document).ready(function ($) {
 	  	
 		  setName = json.setName;
 		  setYear = json.setYear;
-		  var htmlCollage = "";
 		
 			$.each(json.photos, function(photoId, data) {
 				if (photoId != photoEmpty) {	
@@ -90,16 +92,18 @@ $(document).ready(function ($) {
 					}
 				});
 					
-				htmlCollage += "<img src=\"" + mSrc +"\"  csource=\""+ cSrc + "\" />";
+				htmlCollage += "<img src=\"" + mSrc +"\" />";
 				imgCt++;	
 				} 			
 			  }); 
 		  
 			$("#collage").html(htmlCollage);
 			$("#albumTitleInfo").html(setYear+ " " + setName);
-		}
+		}/*, complete: function() {
+		setTimeout(collage, 100);
+		}*/
     });	
-    
+/*    
 	$("#canvas").on("click", "div > ul > li", function (event) {
 		event.preventDefault();
 
@@ -133,14 +137,18 @@ $(document).ready(function ($) {
 		// download all files as zip
 		return false;
 	});
+	
+	*/
 }); 
 
 // dom needs to be fully loaded
 function collage() {
+	$(".loading-gif").hide();
     $("#collage").collagePlus({'targetHeight': 300, 'direction': 'horizontal', 'allowPartialLastRow': true });		
     if ($("#canvas").height() > 1200) {
       var height = $("#canvas").css("height");
       $("#left",parent.document).css("height", height);
+      $("#center",parent.document).css("height", height);
       $("#center-wide",parent.document).css("height", height);
     }
 };
@@ -153,7 +161,7 @@ $(window).bind('resize', function() {
 });
 
 $(window).bind('load', function() {
-    setTimeout(collage, 100);
+    setTimeout(collage, 1000);
 });
 
 

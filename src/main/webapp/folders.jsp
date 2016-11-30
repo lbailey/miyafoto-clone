@@ -68,6 +68,7 @@
   var hash = window.location.hash.substring(1);
   var photoEmpty = "15508109759";
   var isEmpty = "";
+  console.log("corrent to inval" + hash);
   $.getJSON('/flickr/albums?invalidateAlbum='+hash, function(json) {
   	$.each(json,function(c, coll){
   	  $.each(coll, function(i, value) {

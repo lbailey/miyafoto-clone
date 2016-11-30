@@ -504,9 +504,13 @@ public class Integration {
 		int photoCount = Integer.parseInt(photosObject.get("total").toString());
 		String photoSetTitle = photosObject.get("title").toString();
 		
-		PhotoSet aPhotoSet = AlbumSetCache.INSTANCE.hasTitle(photoSetTitle) ? 
+		/*
+		PhotoSet aPhotoSet = AlbumSetCache.INSTANCE.hasTitle(photoSetTitle) && !dateOfSet.isEmpty() ? 
 							 AlbumSetCache.INSTANCE.getByTitle(photoSetTitle) :
 							 new PhotoSet(setId, setTitle, setDesc, photoCount, dateOfSet);
+		*/
+		System.out.println(setTitle + " " + setDesc + " " + dateOfSet);
+		PhotoSet aPhotoSet = new PhotoSet(setId, setTitle, setDesc, photoCount, dateOfSet);
 					
 		JSONArray photosArr = photosObject.getJSONArray("photo");
 		

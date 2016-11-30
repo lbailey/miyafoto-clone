@@ -56,6 +56,8 @@
     </div><!-- / #canvasWrapper -->
 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script src="/includes/jquery.collagePlus.js"></script>
+<script src="/includes/jquery.collagePlus.min.js"></script>
 <script type="text/javascript">
 //  document.domain = "miyafoto";
   $(document).ready(function ($) {
