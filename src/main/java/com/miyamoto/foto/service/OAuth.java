@@ -21,6 +21,8 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.miyamoto.foto.service.files.Store;
+
 public class OAuth {
     
     public enum Permission {    
@@ -46,6 +48,13 @@ public class OAuth {
     		this.userReal = real;
     	}
     	
+    	public User(String userFilePath) throws IOException {
+    		Map<String,String> authMap = Store.getAuthPairs(userFilePath);
+    		this.userId = authMap.get("userId");
+    		this.userName = authMap.get("userName");
+    		this.userReal = authMap.get("userReal");
+    	}
+    	
     	public String getUserId() {
     		return this.userId;
     	}
@@ -67,8 +76,13 @@ public class OAuth {
     	this.permission = perm;
     }     
 
-	public OAuth(File readFromFile) {
-		//do auto stuff
+	public OAuth(String oAuthFilePath) throws IOException {
+		Map<String,String> authMap = Store.getAuthPairs(oAuthFilePath);		
+		this.authToken = 	authMap.get("authToken");
+    	this.authSecret = 	authMap.get("authSecret");
+    	this.apiKey = 		authMap.get("apiKey");
+    	this.sharedSecret = authMap.get("sharedSecret");
+    	this.permission = 	Permission.DELETE;
 	}	
 	
 	protected String getApiKey() {

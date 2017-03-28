@@ -1,3 +1,8 @@
+<%@ page import="com.miyamoto.foto.service.AuthProxy" %>
+<%
+   boolean canRemove = AuthProxy.canRemove(request);
+%>
+
 <!doctype html>
 <html xmlns:og="http://opengraphprotocol.org/schema/" xmlns:fb="http://www.facebook.com/2008/fbml" itemscope itemtype="http://schema.org/Thing" lang="en-US">
   <head>
@@ -22,6 +27,7 @@
 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 <script src="/includes/jquery.collagePlus.min.js"></script>
+<script src="/includes/jquery.collageCaption.min.js"></script>
 <!--<script src="/includes/jquery.collagePlus.js"></script>-->
 <script type="text/javascript">
   //document.domain = "miyafoto";  
@@ -38,7 +44,8 @@ $(document).ready(function ($) {
 	var photoEmpty = "15508109759";
 	var imgCt = 0;	
 	
-	var setName, setYear;
+	var setName, setYear, setTitle;
+	var canRemove = <%= canRemove %>;
 /*
     $.getJSON('/flickr/albums?photoSetId='+hash, function(json) {
       	
@@ -78,12 +85,13 @@ $(document).ready(function ($) {
 	  	
 		  setName = json.setName;
 		  setYear = json.setYear;
+		  setTitle = json.setTitle;
 		
 			$.each(json.photos, function(photoId, data) {
 				if (photoId != photoEmpty) {	
 				$.each(data,function(size, crops){
-					if (size == 'Large') {
-						cSrc = crops.source;
+					if (size == 'Original') {
+						oSrc = crops.source;
 					}
 					if (size === 'Medium') {
 						mSrc = crops.source;
@@ -92,18 +100,54 @@ $(document).ready(function ($) {
 					}
 				});
 					
-				htmlCollage += "<img src=\"" + mSrc +"\" />";
+				htmlCollage += "<div class=\"image-wrapper\" data-caption=\"<a href='" + oSrc + 
+							   "' style='font-size: 13pt;color: white;font-weight: bold;float: right;margin-right: 5px;'" + 
+							   "download><span style='font-size: 9pt;font-weight: 100;line-height: 16pt;letter-spacing: .5px;font-style: italic;'>download&nbsp;</span>&#9112;</a>&nbsp;&nbsp;";
+							   
+				if (canRemove) { 
+					htmlCollage += "<a href='#' style='color: white;font-weight: bold;' class='delete-img' id='"+photoId+"'>&#10005;</a>"; 
+				}
+				
+				htmlCollage += "\"><img src=\"" + mSrc +"\" /></div>";
 				imgCt++;	
 				} 			
 			  }); 
-		  
+			
 			$("#collage").html(htmlCollage);
 			$("#albumTitleInfo").html(setYear+ " " + setName);
 			$("#albumTitleInfo").css({visibility:"visible"});
+			
+			if (Object.keys(json.photos).length == 1) {
+			  $("#albumTitleInfo").append(" - empty");
+			}
+		  
+			
 		}/*, complete: function() {
 		setTimeout(collage, 100);
 		}*/
     });	
+    
+    $("#canvas").on("click", "div > div > div > div > div > a.delete-img", function (e) {
+		e.preventDefault();
+        if (window.confirm("Are you sure you want to delete this photo?")) {
+		    var $tainer = $( this ),
+    		    imgId = $tainer.attr('id') ;
+    		
+    	    // Send the data using post
+  		    var posting = $.post( "/flickr/remove", { photoId: imgId, photoSetId: hash } );
+  		        posting.done(function( data ) {
+    		        console.log('posted ' + $tainer.parent().parent().parent().attr('class'));
+    		        $tainer.parent().parent().parent().fadeOut().queue(function(nxt) { 
+                		$(this).remove();
+                		setTimeout(collage, 300);
+                		nxt();
+            		});
+    		        //now literally remove or fade out the image from the gallery
+  		    });
+  		}
+	});
+    
+    
 /*    
 	$("#canvas").on("click", "div > ul > li", function (event) {
 		event.preventDefault();
@@ -146,6 +190,7 @@ $(document).ready(function ($) {
 function collage() {
 	$(".loading-gif").hide();
     $("#collage").collagePlus({'targetHeight': 300, 'direction': 'horizontal', 'allowPartialLastRow': true });		
+    $("#collage").collageCaption();
     if ($("#canvas").height() > 1200) {
       //var height = $("#canvas").css("height");
       var height = $("#canvas").height() + 42; //the answer to the universe
@@ -158,15 +203,15 @@ function collage() {
 
 var resizeTimer = null;
 $(window).bind('resize', function() {
-    $('.collage .Image_Wrapper').css("opacity", 0);
+    $('#collage .image-wrapper').css("opacity", 0);
     if (resizeTimer) clearTimeout(resizeTimer);
     resizeTimer = setTimeout(collage, 200);
 });
 
 $(window).bind('load', function() {
-    setTimeout(collage, 1000);
+	var time = $("#collage").children().size() * 50;
+    setTimeout(collage, 1000 + time);
 });
-
 
 
   </script>

@@ -1,3 +1,10 @@
+<%@ page import="com.miyamoto.foto.service.AuthProxy" %>
+<%
+if(AuthProxy.isAuthorized(request)) {
+   response.sendRedirect("index-view.jsp");
+}
+%>
+
 <!doctype html>
 <html xmlns:og="http://opengraphprotocol.org/schema/" xmlns:fb="http://www.facebook.com/2008/fbml" itemscope itemtype="http://schema.org/Thing" lang="en-US">
   <head>
@@ -17,66 +24,48 @@
   }
 </script> 
 </head>
-  
-  <body class="miyamoto logo-image">
 
-    <div id="canvasWrapper">
-    	<div id="canvas">
-
-    		<header id="header">
-    		<h2>miya<span class="add">moto</span>-foto</h2>
-			  <div id="topNav"  data-content-field="navigation-navigation">
-				  <nav class="main-nav">
-					<ul id="siteNav">
-					  <li class="toggle"><a href="#mobileNav" id="mobile-show-nav" class="icon-list"></a></li>
-						<li class="page-collection"><a href="#" id="introPage">About</a></li>
-						<li class="page-collection"><a href="#" id="viewSection">View</a></li>
-						<li class="page-collection"><a href="#" id="uploadSection">Upload</a></li>
-						<li class="page-collection active-link"><a href="#">Login</a></li>
-					</ul>
-				  </nav>
-			</div>
-    </header>
-
-
-	<!--<img src="http://i184.photobucket.com/albums/x172/DavidAtwell/sourcegradient.png" style="right: 0px; position: absolute; z-index:101;"/>-->
-	<div id="frameWrapper">
-		<iframe id="left" src="upload.jsp" scrolling="no">
-		</iframe>
-	
-		<iframe id="center" src="intro.jsp" scrolling="yes" name="viewportFrame">
-		</iframe>
-	
-	
-		<iframe id="right" src="folders.jsp" onload="resizeIframe(this)" scrolling="yes" name="fileFrame">
-		</iframe> 
-	</div>
-
-
-        <div class="page-divider"></div>
-        
-
-    	</div><!-- / #canvas -->
-    </div><!-- / #canvasWrapper -->
-
+<body>
+<div class="login-body"></div>
+<section class="login-wrapper">
+  <div class="form">
+  <h2>miya<span class="add">moto</span>-foto</h2>
+    <form id="logIn" class="login-form" action="/flickr/authorize">
+      <input id="userId" name="userId" type="text" placeholder="username"/>
+      <input id="userPass" name="userPass" type="password" placeholder="password"/>
+      <input class="button" type="submit" value="login" />
+    </form>
+  </div>
+</section>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-<script type="text/javascript">
-//  document.domain = "miyafoto";
-  $(document).ready(function ($) {
+<script>
+// Attach a submit handler to the form
+$( "#logIn" ).submit(function( event ) {
 
-    $("#introPage").on("click", function () {
-		$( '#center' ).attr( 'src', function ( i, val ) { return "http://"+$(location).attr('host') + "/intro.jsp"; });
-    });
-    $("#uploadSection").on("click", function () {
-    	window.location.href = "http://"+$(location).attr('host') + "/index-upload.jsp";
-    });
-    $("#viewSection").on("click", function () {
-    	window.location.href = "http://"+$(location).attr('host') + "/index-view.jsp";
-    });
-
-});   
-</script> 
+	console.log("wheee"); 
+  // Stop form from submitting normally
+  event.preventDefault(); 
+  // Get some values from elements on the page:
   
+  
+  var $form = $( this ),
+    user = $form.find( "input[name='userId']" ).val(),
+    pass = $form.find( "input[name='userPass']" ).val(),
+    url = $form.attr( "action" );
+    
+ console.log(url);
+ 
+  // Send the data using post
+  var posting = $.post( url, { userId: user, userPass: pass } );
+  posting.done(function( data ) {
+    //go to view
+    location.reload();
+  });
+});
+</script>
+
+
+
 
   </body>
 </html>

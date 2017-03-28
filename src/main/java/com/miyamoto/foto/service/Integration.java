@@ -53,6 +53,8 @@ import com.miyamoto.foto.service.photos.Crop;
 import com.miyamoto.foto.service.photos.Photo;
 import com.miyamoto.foto.service.photos.PhotoSet;
 
+import com.miyamoto.foto.service.files.Store;
+
 public class Integration {
     
     private static final String EMPTY_PHOTO = "15508109759";
@@ -71,17 +73,21 @@ public class Integration {
 		
 		private static Cache<String,PhotoSet> setIdCache =
 				CacheBuilder.newBuilder()
-						.maximumSize(400)
+						.maximumSize(5000)
 						.build();
 						
 		private static Cache<String,PhotoSet> titleCache =
 				CacheBuilder.newBuilder()
-						.maximumSize(50)
+						.maximumSize(5000)
 						.build();				
 		
 		public void expireAndAdd(String photoSetId, PhotoSet photoSet) {
 			setIdCache.invalidate(photoSetId);
 			setIdCache.put(photoSetId, photoSet);
+		}
+		
+		public void expire(String photoSetId) {
+			setIdCache.invalidate(photoSetId);
 		}
 
 		public boolean hasKey(String photoSetId) {
@@ -120,14 +126,20 @@ public class Integration {
 	// TODO: Call these secret vals from server file
 	//
 	//
-    public Integration() {
-    	this.authorized = new OAuth("72157647029609305-838676ff0f16554f","8c281edcae082331","eccbfec6885f6adefb2fd063dce81a20","b114d59e550cf4e9", Permission.DELETE);
-    	this.user = authorized.new User("126576272@N06","miyamoto.foto","Lindsay Papp"); 
+    public Integration() throws IOException {
+    	this.authorized = new OAuth(Store.getOAuthFilePath());
+    	this.user = authorized.new User(Store.getUserAuthFilePath());
+    	
+    	//this.authorized = new OAuth("72157647029609305-838676ff0f16554f","8c281edcae082331","eccbfec6885f6adefb2fd063dce81a20","b114d59e550cf4e9", Permission.DELETE);
+    	//this.user = authorized.new User("126576272@N06","miyamoto.foto","Lindsay Papp"); 
     }
     
-    public Integration(ImageMeta imageMeta) {	
-    	this.authorized = new OAuth("72157647029609305-838676ff0f16554f","8c281edcae082331","eccbfec6885f6adefb2fd063dce81a20","b114d59e550cf4e9", Permission.DELETE);
-    	this.user = authorized.new User("126576272@N06","miyamoto.foto","Lindsay Papp"); 
+    public Integration(ImageMeta imageMeta) throws IOException {	
+        this.authorized = new OAuth(Store.getOAuthFilePath());
+    	this.user = authorized.new User(Store.getUserAuthFilePath());
+    
+ //   	this.authorized = new OAuth("72157647029609305-838676ff0f16554f","8c281edcae082331","eccbfec6885f6adefb2fd063dce81a20","b114d59e550cf4e9", Permission.DELETE);
+ //   	this.user = authorized.new User("126576272@N06","miyamoto.foto","Lindsay Papp"); 
     	this.imageMeta = imageMeta;
     }
     
@@ -264,26 +276,82 @@ public class Integration {
     
     }
     
+     //
+    //
+    // Post to Flickr: Tell Flickr to move image with specific ID to specific photo set with ID
+    //
+    //
+    public String removePhotoFromAlbum(String photoSetId, String photoId) {
+    	
+    	Map<String, Object> parameters = new HashMap<String, Object>();
+
+        parameters.put("photoset_id", photoSetId);
+        parameters.put("photo_id", photoId);
+        
+    	OAuthRequest request = new OAuthRequest(Verb.POST, "https://api.flickr.com/services/rest/");
+            	  
+        request.addHeader("Content-Type", "multipart/form-data; boundary=" + getMultipartBoundary());		
+		request.addQuerystringParameter("method", "flickr.photosets.removePhoto");
+		request.addQuerystringParameter("photoset_id", photoSetId);
+		request.addQuerystringParameter("photo_id", photoId);
+               
+        Token requestToken = new Token(getAuthorize().getToken(), getAuthorize().getTokenSecret());
+        ServiceBuilder serviceBuilder = new ServiceBuilder().provider(FlickrApi.class).apiKey(getAuthorize().getApiKey()).apiSecret(getAuthorize().getSharedSecret());
+        OAuthService service = serviceBuilder.build();
+        
+        service.signRequest(requestToken, request);
+        
+        parameters.putAll(request.getOauthParameters());
+        request.addPayload(buildMultipartBody(parameters, getMultipartBoundary()));
+        
+        Response scribeResponse = request.send();
+        String strXml = scribeResponse.getBody();
+        
+        //kind of inappropriate hammer destroy method, rethink removing single photo from cache
+        PhotoSet aPhotoSet = AlbumSetCache.INSTANCE.getPhotoSet(photoSetId);
+        String setYear = aPhotoSet.getSetYear(), setType = aPhotoSet.getSetType();
+        String photoJsonString = cleanJsonResponse(getPhotosOfSet(photoSetId)); // Only do if cache is empty
+		aPhotoSet = parsePhotoSetResponse(photoSetId, aPhotoSet.getPhotoSetTitle(), aPhotoSet.getPhotoSetName(), photoJsonString, aPhotoSet.getDateUpdated());	
+		aPhotoSet.addSetYear(setYear);
+		aPhotoSet.addSetType(setType);
+		
+		AlbumSetCache.INSTANCE.expireAndAdd(photoSetId, aPhotoSet);		
+        
+        return strXml;
+    
+    }
+ 
     //
     //
     // JSON: send list of albums by title-PhotoSet to use for side-navigation
 	// 
 	//    
     public String albumListToJson(String selectedYear) {
-		JSONObject jsonObject = new JSONObject();							//invalTitle
+		JSONObject jsonObject = new JSONObject();							//use cache when possible
 		TreeMap<String,PhotoSet> completeList = retrieveFlickrPhotoSets("year-type-title","title");
 	
 		JSONObject collObj = new JSONObject();
 		JSONArray typeArr = new JSONArray();
 		String prevType = "", currentType;
-		for (String album : completeList.keySet()) {			
-			if (album.startsWith(selectedYear)) {
+		int albumCount = completeList.size(), acc = 1;
+		for (String album : completeList.keySet()) {	
+				
+			if (album.startsWith(selectedYear)) {		
 				currentType = completeList.get(album).getSetType();
-				prevType = prevType.isEmpty()? currentType : prevType;
+				
+				//handles first iter
+				if (prevType.isEmpty()) {
+					collObj.put(currentType, typeArr);
+					prevType = currentType;
+				} 
+				
+				//I'm only saving when the type changes, meaning I need to save the last bit
+				//maybe a set a flag for when data saved?
+				//write at the end of the loop now
 				if (!currentType.matches(prevType)) {
 				   collObj.put(prevType, typeArr);
 				   typeArr = new JSONArray();
-				}
+				} 
 				
 				JSONObject setJson = new JSONObject();
 				PhotoSet ps = completeList.get(album);
@@ -293,7 +361,13 @@ public class Integration {
 				setJson.put("setCount", ps.getPhotoSetCount());
 				typeArr.put(setJson);
 				prevType = currentType;
+			
+			} 
+			//if last album, grab the stuffs since I only write onchange
+			if (albumCount == acc) {
+				collObj.put(prevType, typeArr);
 			}
+			acc++;
 		}
 		
 		jsonObject.put("result", collObj);		
@@ -601,14 +675,14 @@ public class Integration {
 			//
 			// If we are invalidating the list version for menu/navigation
 			//	
-			} else if (cacheType.equalsIgnoreCase("title")) {
+			} else if (cacheType.equalsIgnoreCase("title")) {			
 				if (AlbumSetCache.INSTANCE.hasTitle(setTitle)) {
 					aPhotoSet = AlbumSetCache.INSTANCE.getByTitle(setTitle);
 				} else {
 					aPhotoSet = new PhotoSet(setId, setTitle, setDesc, count, dateUpdate);
 					aPhotoSet.addSetYear(setYear);
 					aPhotoSet.addSetType(setType);
-					AlbumSetCache.INSTANCE.addByTitle(setTitle, aPhotoSet);							
+					AlbumSetCache.INSTANCE.addByTitle(setTitle, aPhotoSet);	
 				}			
 				entireCollection.put(aPhotoSet.getPhotoSetTitle(), aPhotoSet);
 			}

@@ -1,3 +1,6 @@
+<%@ page import="com.miyamoto.foto.service.AuthProxy" %>
+<% AuthProxy.authorizeSession(request, response); %>
+
 <!doctype html>
 <html xmlns:og="http://opengraphprotocol.org/schema/" xmlns:fb="http://www.facebook.com/2008/fbml" itemscope itemtype="http://schema.org/Thing" lang="en-US">
   <head>
@@ -32,10 +35,11 @@
 						<li class="page-collection"><a href="#" id="introPage">About</a></li>
 						<li class="page-collection"><a href="#" id="viewSection">View</a></li>
 						<li class="page-collection active-link"><a href="#">Upload</a></li>
-						<li class="page-collection"><a href="#">Login</a></li>
+						<li class="page-collection"><a href="" id="logoutButton">Logout</a></li>
 					</ul>
 				  </nav>
 			</div>
+			<div id="loginForm"></div>
     </header>
 
 
@@ -70,6 +74,11 @@
     
     $("#viewSection").on("click", function () {
     	window.location.href = "http://"+$(location).attr('host') + "/index-view.jsp";
+    });
+    
+    $("#logoutButton").on("click", function() {
+    	$.post( "/flickr/authorize?logout", { logout: "" } );
+    	 location.reload();
     });
 
 });   

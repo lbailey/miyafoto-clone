@@ -251,6 +251,22 @@ nav ol {
 }
 /* LAYOUT (WIDTHS & PADDING)
 ************************************************/
+div.login-body {
+  //background-image: url('http://media.istockphoto.com/vectors/abstract-black-and-white-chinese-painting-mountain-background-vector-id516549621?k=6&m=516549621&s=170667a&w=0&h=lhvxa_XmtURhA8pC7I__dlqnVWp9D4iRTwZXrru_uik=');
+  background-color: #f4f4f4;
+  /* https://www.gismeteo.ru/static/news/img/src/23060/797c8109.jpg */
+  background-size: cover;
+  display: block;
+  filter: blur(3px);
+  -webkit-filter: blur(3px);
+  height: 800px;
+  left: -10px;
+  position: fixed;
+  right: 0;
+  z-index: 1;
+  opacity: .8;
+}
+
 #canvas {
   max-width: 100%;
   margin: 0 auto;
@@ -265,10 +281,12 @@ nav ol {
   margin-left: 25px;
     cursor: default;
 }
-#header h2 span.add {
+#header h2 span.add,
+h2 span.add {
   display: none;
 }
-#header h2:hover span.add {
+#header h2:hover span.add,
+h2:hover span.add {
   display: inline;
   transition: all 0.15s;
   color:pink;
@@ -322,6 +340,70 @@ nav ol {
   top: -100px;
   background: #eee;
 }
+
+#loginForm {
+float: right;
+    display: inline-block;
+    width: 300px;
+    /* display: block; */
+    height: 50px;
+    position: relative;
+    top: -14px;
+    margin-top: -50px;
+    right: 630px;
+
+}
+
+section.login-wrapper {
+  width: 360px;
+  padding: 8% 0 0;
+  margin: auto;
+}
+section.login-wrapper .form {
+  position: relative;
+  z-index: 1;
+  background: #FFFFFF;
+  max-width: 360px;
+  margin: 0 auto 100px;
+  padding: 20px 45px 45px 45px;
+  text-align: center;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.05), 0 5px 5px 0 rgba(0, 0, 0, 0.05);
+}
+section.login-wrapper .form input {
+  font-family: "Helvetica Neue", sans-serif;
+  outline: 0;
+  background: #f2f2f2;
+  width: 100%;
+  border: 0;
+  margin: 0 0 15px;
+  padding: 15px;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+section.login-wrapper .form input.button {
+  font-family: sans-serif;
+  text-transform: uppercase;
+  outline: 0;
+  background: pink;
+  width: 100%;
+  border: 0;
+  padding: 15px;
+  color: #FFFFFF;
+  font-size: 14px;
+  -webkit-transition: all 0.3 ease;
+  transition: all 0.3 ease;
+  cursor: pointer;
+}
+section.login-wrapper .form button:hover,.form button:active,.form button:focus {
+  background: #f7acb9;
+}
+section.login-wrapper .form .message {
+  margin: 15px 0 0;
+  color: #b3b3b3;
+  font-size: 12px;
+}
+
+
 #sectionWrapper {
   margin-bottom: 30px;
 }
@@ -354,6 +436,28 @@ nav ol {
   float: right;
 }
 
+.arrow-left {
+    width: 0px;
+    height: 0px;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-right: 5px solid #777;
+    left: -11px;
+    top: 60px;
+    position: relative;
+}
+
+.arrow-right {
+    width: 0px;
+    height: 0px;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 5px solid #777;
+    top: 50px;
+    position: relative;
+    left: 159px;
+}
+
 .quick-view {
   margin: 0 auto;
   font-style: italic;
@@ -363,6 +467,45 @@ nav ol {
 	display: inline-flex;
     width: 100%;
     padding-bottom: 5px;
+}
+
+#slider .title-overlay {
+    display: block;
+    position: relative;
+    word-wrap: break-word;
+    top: -75px;
+    margin-bottom: -55px;
+    font-size: 12pt;
+    font-style: italic;
+    color: black;
+    font-size: 10pt;
+    width: 155px;
+    height: 75px;
+    cursor: pointer;
+}
+
+#slider .title-overlay > span.title,
+#slider .title-overlay > span.year {
+display: block;
+    text-indent: 5px;
+    color: #555;
+    letter-spacing: .5px;
+    top: 75px;
+    position: relative;
+}
+
+#slider div.title-overlay::before {
+    content:'';
+    position:absolute;
+    left:0;
+    top: 0;
+    opacity:.7;
+    width:100%;
+    height:100%;
+     -moz-box-shadow: inset 0px -120px 75px -75px #fff;
+    -webkit-box-shadow: inset 0px -120px 75px -75px #fff;
+    -o-box-shadow: inset 0px -120px 75px -75px #fff;
+    box-shadow: inset 0px -120px 75px -75px #fff;
 }
 
 
@@ -412,9 +555,14 @@ nav ol {
   padding:10px;
 }
 
-#collage img {
+#collage img, #collage .image-wrapper {
   vertical-align:bottom;
   opacity:0;
+}
+
+#collage div img {
+  vertical-align:bottom;
+  opacity:1;
 }
 
 a.grid:hover,
@@ -791,6 +939,7 @@ font-size: 12pt;
     margin: 30px auto;
     width: 95px;
     display: block;
+    text-align: center;
 }
 
 .circle { 

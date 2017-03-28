@@ -1,0 +1,5 @@
+authToken:72157647029609305-838676ff0f16554f
+authSecret:8c281edcae082331
+apiKey:eccbfec6885f6adefb2fd063dce81a20
+sharedSecret:b114d59e550cf4e9
+permission:Permission.DELETE;

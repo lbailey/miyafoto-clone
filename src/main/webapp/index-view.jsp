@@ -1,3 +1,6 @@
+<%@ page import="com.miyamoto.foto.service.AuthProxy" %>
+<% AuthProxy.authorizeSession(request, response); %>
+
 <!doctype html>
 <html xmlns:og="http://opengraphprotocol.org/schema/" xmlns:fb="http://www.facebook.com/2008/fbml" itemscope itemtype="http://schema.org/Thing" lang="en-US">
   <head>
@@ -25,17 +28,18 @@
 
     		<header id="header">
     		<h2>miya<span class="add">moto</span>-foto</h2>
-			  <div id="topNav"  data-content-field="navigation-navigation">
+			  <div id="topNav" style="margin-right: 45px;"  data-content-field="navigation-navigation">
 				  <nav class="main-nav">
 					<ul id="siteNav">
 					  <li class="toggle"><a href="#mobileNav" id="mobile-show-nav" class="icon-list"></a></li>
 						<li class="page-collection"><a href="#" id="introPage">About</a></li>
 						<li class="page-collection active-link"><a href="#" id="viewSection">View</a></li>
 						<li class="page-collection"><a href="#" id="uploadSection">Upload</a></li>
-						<li class="page-collection"><a href="#">Login</a></li>
+						<li class="page-collection"><a href="" id="logoutButton">Logout</a></li>
 					</ul>
 				  </nav>
 			</div>
+			<div id="loginForm"></div>
     </header>
 
 
@@ -71,6 +75,12 @@
     $("#uploadSection").on("click", function () {
     	window.location.href = "http://"+$(location).attr('host') + "/index-upload.jsp";
     });
+    
+    $("#logoutButton").on("click", function() {
+    	$.post( "/flickr/authorize?logout", { logout: "" } );
+    	 location.reload();
+    });
+    
 
 });   
 </script> 

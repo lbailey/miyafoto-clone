@@ -35,6 +35,8 @@ $(document).ready(function(){
 	var minOffset = 0, maxOffset = 7; // Change to whatever you want
 	var thisYear = (new Date()).getFullYear();
 	var select = $('<select id="albumYear">');
+	var typeSet = ['formal','shower','festival','holiday','athletic','misc' ];
+	var difference = [];
 
 	for (var i = minOffset; i <= maxOffset; i++) {
     	var year = thisYear - i;
@@ -48,6 +50,7 @@ $(document).ready(function(){
 		var year = $("#albumYearSelect").find(":selected").text();
 		$.getJSON('/flickr/albums?albumYear='+year, function(json) {
 		  $.each(json,function(c, coll){
+		   console.log(year + " size: " + Object.keys(coll).length  + " " + Object.keys(coll) + $.isEmptyObject(coll));
 			$.each(coll, function(photoType, photoSet) {
 			  var html = "<li><p>" + photoType + "</p><ul>";      
 			  $.each(photoSet, function(i, album) {   
@@ -56,9 +59,24 @@ $(document).ready(function(){
 		 
 			  html += "</ul></li>";
 		
-			  $("#accordian > ul").append(html);   
-			  $("#accordian > ul > li:nth-child(2) > p").next().slideDown();		
+			  $("#accordian > ul").append(html);  			   
+			  //$("#accordian > ul > li:nth-child(2) > p").next().slideDown();		 
 			});
+			
+			if (Object.keys(coll).length < 6) {
+		      difference = $.grep(typeSet,function(x) {return $.inArray(x, Object.keys(coll)) < 0});
+		    } 
+			console.log(difference);
+		   
+		   //if difference has stuff
+		   if (!$.isEmptyObject(difference)) {
+		     $.each(difference, function(missIn, missCat) {
+		   		var emptyAddHtml = "<li><p>" + missCat + "</p><ul>";
+				$("#accordian > ul").append(emptyAddHtml);  
+		   	});
+		   }	
+		   $("#accordian > ul > li:nth-child(2) > p").next().slideDown();	   
+			
 		  });
 		});
 		return false;

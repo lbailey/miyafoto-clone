@@ -62,6 +62,10 @@ public class PhotoSet implements Comparator<Photo>{
     public void addPhotoToSet(Photo aPhoto) {
     	this.photoSet.add(aPhoto);
     }
+    
+    public void removePhotoFromSet(Photo aPhoto) {
+    	this.photoSet.add(aPhoto);
+    }
 
 	public LinkedList<Photo> getPhotoSet() {
 		return photoSet;

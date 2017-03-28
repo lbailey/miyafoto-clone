@@ -10,12 +10,11 @@ import org.apache.catalina.webresources.StandardRoot;
 import org.apache.catalina.webresources.DirResourceSet;
 
 
-/**
-*
-* Huge thanks to http://stackoverflow.com/questions/11669507/
-*						embedded-tomcat-7-servlet-3-0-annotations-not-working
-*
-*/
+//
+//
+// Tomcat server startup for Miya
+//
+//
 public class Main {
 
     public static void main(String[] args) throws Exception {
