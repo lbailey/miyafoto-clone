@@ -43,7 +43,6 @@
     </header>
 
 
-	<!--<img src="http://i184.photobucket.com/albums/x172/DavidAtwell/sourcegradient.png" style="right: 0px; position: absolute; z-index:101;"/>-->
 	<div id="frameWrapper">
 		<iframe id="left" src="upload.jsp" scrolling="no">
 		</iframe>

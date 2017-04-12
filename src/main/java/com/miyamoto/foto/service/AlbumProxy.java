@@ -19,9 +19,8 @@ import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-import com.miyamoto.foto.service.ImageMeta;
 import com.miyamoto.foto.service.Integration;
+import com.miyamoto.foto.service.ProxyConstants;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -30,11 +29,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 
 @WebServlet(
         name = "AlbumProxy",
@@ -47,14 +41,14 @@ public class AlbumProxy extends HttpServlet {
 	@Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {		
 		try {
-			if (request.getParameter("photoSetId") != null) {
-				String photoSetId = request.getParameter("photoSetId");
+			if (request.getParameter(ProxyConstants.PHOTOSET_ID) != null) {
+				String photoSetId = request.getParameter(ProxyConstants.PHOTOSET_ID);
 				getAlbum(request,response,photoSetId);
-			} else if  (request.getParameter("invalidateAlbum") != null) {
-				String invalidateAlbum = request.getParameter("invalidateAlbum");
+			} else if  (request.getParameter(ProxyConstants.INVALIDATE_ALBUM) != null) {
+				String invalidateAlbum = request.getParameter(ProxyConstants.INVALIDATE_ALBUM);
 				getAlbumSet(request,response,invalidateAlbum);	
-			} else if (request.getParameter("albumYear") != null) {		
-				String photoYear = request.getParameter("albumYear");
+			} else if (request.getParameter(ProxyConstants.ALBUM_YEAR) != null) {		
+				String photoYear = request.getParameter(ProxyConstants.ALBUM_YEAR);
 				getAlbumList(request, response, photoYear);		
 			} else {
 				getAlbumList(request,response,"2016");
@@ -66,18 +60,17 @@ public class AlbumProxy extends HttpServlet {
     
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {		
-
 		try { 
-			if (request.getParameter("photoSetId") != null && request.getParameter("photoId") != null) {
-		  		String photoSetId = request.getParameter("photoSetId");
-          		String photoId = request.getParameter("photoId");
+			if (request.getParameter(ProxyConstants.PHOTOSET_ID) != null && request.getParameter(ProxyConstants.PHOTO_ID) != null) {
+		  		String photoSetId = request.getParameter(ProxyConstants.PHOTOSET_ID);
+          		String photoId = request.getParameter(ProxyConstants.PHOTO_ID);
 		  		Integration ppl = new Integration();
 		  		String resStr = ppl.moveToAlbum(photoSetId, photoId);
 		  		System.out.println(resStr);
 		  		response.getWriter().println(resStr);	
-		  	} else if (request.getParameter("albumName") != null && request.getParameter("albumPrefix") != null) {
-		  		String albumName = request.getParameter("albumName");
-		  		String albumPrefix = request.getParameter("albumPrefix"); // "year" and "category" e.g. "2014-formal"
+		  	} else if (request.getParameter(ProxyConstants.ALBUM_NAME) != null && request.getParameter(ProxyConstants.ALBUM_PREFIX) != null) {
+		  		String albumName = request.getParameter(ProxyConstants.ALBUM_NAME);
+		  		String albumPrefix = request.getParameter(ProxyConstants.ALBUM_PREFIX); // "year" and "category" e.g. "2014-formal"
 		  		Integration ppl = new Integration();
 		  		String albumPhotoSetId = ppl.createNewAlbum(albumName, albumPrefix);
 		  		response.getWriter().println(albumPhotoSetId);

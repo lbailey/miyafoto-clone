@@ -89,7 +89,6 @@ public class Store {
     }
 	
 	//functions to check files for password in relation to enum logins.
-	//for now the correct password is always "password"
 	public static int authorizeUser(String loginUser, String loginPass) throws IOException {
 	
 		//verify that it matches the file stuff 
@@ -121,6 +120,9 @@ public class Store {
     
     private static void writeFile(HashMap<String,String> userLogins) throws IOException  {  
     
+    	Files.write(Paths.get(USER_PATH), "".getBytes(),StandardOpenOption.CREATE,StandardOpenOption.TRUNCATE_EXISTING );
+     	Files.write(Paths.get(USER_PASS_PATH), "".getBytes(),StandardOpenOption.CREATE,StandardOpenOption.TRUNCATE_EXISTING );
+    
 		for(Map.Entry<String, String> entry : userLogins.entrySet()) {
    			final String newLine = System.lineSeparator();
    			
@@ -134,6 +136,18 @@ public class Store {
 			Files.write(Paths.get(USER_PATH), newLine.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
 			Files.write(Paths.get(USER_PASS_PATH), passEncrypted.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
 			Files.write(Paths.get(USER_PASS_PATH), newLine.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+    	}
+    }
+    
+    private static void writeOAuth(HashMap<String,String> oAuthVars, String filePath) throws IOException  {  
+    
+    	Files.write(Paths.get(filePath), "".getBytes(),StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING );
+    
+		for(Map.Entry<String, String> entry : oAuthVars.entrySet()) {
+   			final String newLine = System.lineSeparator();
+   			String concat = entry.getKey() + ":" + entry.getValue();
+			Files.write(Paths.get(filePath), concat.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+			Files.write(Paths.get(filePath), newLine.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
     	}
     }
 	

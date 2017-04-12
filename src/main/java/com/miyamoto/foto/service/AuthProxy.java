@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import com.miyamoto.foto.service.files.Store;
+import com.miyamoto.foto.service.ProxyConstants;
 
 @WebServlet(
         name = "AuthProxy",
@@ -33,32 +34,20 @@ public class AuthProxy extends HttpServlet {
 	@Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {		
 		try { 
-			if (request.getParameter("userId") != null && request.getParameter("userPass") != null) {
-		  		
-		  		//need to do this with project init, where AutoAuth is
-		  		HashMap<String, String> userMap = new LinkedHashMap<String,String> () {{
-		  			put("admin","admin");
-		  			put("geisha","osc51");
-		  			put("maiko","osc51");
-		  			put("default","password");
-				}};
-				
-		  		//Store.writeFile(userMap);
-		  		
-		  		String loginUser = request.getParameter("userId");
-          		String loginPass = request.getParameter("userPass");
+			if (request.getParameter(ProxyConstants.USER_ID) != null && request.getParameter(ProxyConstants.USER_PASS) != null) {
+		  		String loginUser = request.getParameter(ProxyConstants.USER_ID);
+          		String loginPass = request.getParameter(ProxyConstants.USER_PASS);
 		  		int permissionLevel = Store.authorizeUser(loginUser, loginPass);
 		  		String resStr =  Integer.toString(permissionLevel);
-		  		System.out.println(resStr);
-		  		//response.getWriter().println(resStr);	
+		  		System.out.println(resStr);	
 		  		if (permissionLevel > 0) {
 		  			setSessionVars(request, loginUser, permissionLevel);
 		  		}
 		  		
-		  	} else if (request.getParameter("logout") != null) {
+		  	} else if (request.getParameter(ProxyConstants.AUTH_LOGOUT) != null) {
 		  		HttpSession session = request.getSession(false); 	
-		  		session.setAttribute("authenticated", false);
-		  		session.setAttribute("permission", Store.Login.NONE.getPermissionInt());
+		  		session.setAttribute(ProxyConstants.AUTHENTICATED, false);
+		  		session.setAttribute(ProxyConstants.AUTH_PERMISSION, Store.Login.NONE.getPermissionInt());
 		  	}
 	   } catch(Exception ex) {
 		   System.out.println(ex);
@@ -68,8 +57,8 @@ public class AuthProxy extends HttpServlet {
     private static void setSessionVars(HttpServletRequest request, String userId, int permissionInt) throws IOException, ServletException {		
 		try { 
 			HttpSession session = request.getSession(false); 	
-        	session.setAttribute("authenticated", true);
-        	session.setAttribute("permission", permissionInt); 		
+        	session.setAttribute(ProxyConstants.AUTHENTICATED, true);
+        	session.setAttribute(ProxyConstants.AUTH_PERMISSION, permissionInt); 		
 	   } catch(Exception ex) {
 		   System.out.println(ex);
 	   }
@@ -79,7 +68,7 @@ public class AuthProxy extends HttpServlet {
     public static void authorizeSession(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {		
 		try { 
 			HttpSession session = request.getSession(false);
-			if(!isAuthorized(request)) response.sendRedirect("index.jsp"); 
+			if(!isAuthorized(request)) response.sendRedirect(ProxyConstants.AUTH_REDIRECT); 
 			
 	   } catch(Exception ex) {
 		   System.out.println(ex);
@@ -90,9 +79,9 @@ public class AuthProxy extends HttpServlet {
 		try { 
 			HttpSession session = request.getSession(false);
         	
-        	if(session.getAttribute("authenticated") == null) return false;
- 			else if(session.getAttribute("authenticated") != null) {
- 			 	return session.getAttribute("authenticated").equals(false) ? false : true;
+        	if(session.getAttribute(ProxyConstants.AUTHENTICATED) == null) return false;
+ 			else if(session.getAttribute(ProxyConstants.AUTHENTICATED) != null) {
+ 			 	return session.getAttribute(ProxyConstants.AUTHENTICATED).equals(false) ? false : true;
 			}
    				 
 	   } catch(Exception ex) {
@@ -106,7 +95,7 @@ public class AuthProxy extends HttpServlet {
 		try { 
 			HttpSession session = request.getSession(false);        	
         	if(isAuthorized(request)) {
-        		Integer permissionLevel = (Integer)session.getAttribute("permission");
+        		Integer permissionLevel = (Integer)session.getAttribute(ProxyConstants.AUTH_PERMISSION);
         		return permissionLevel > 2; 	//clean
         	}
    				 

@@ -13,10 +13,7 @@
 <link rel="shortcut icon" href="includes/favicon.ico" type="image/x-icon">
 <link rel="icon" href="includes/favicon.ico" type="image/x-icon">
 <script type="text/javascript">
-  //document.domain = "miyafoto";
   function resizeIframe(iframe) {
-   // iframe.height = iframe.contentWindow.document.body.scrollHeight + "px";
-   // alert(iframe.contentWindow.document.body.scrollHeight + 'px');
   }
 </script> 
 </head>
@@ -63,7 +60,6 @@
 <script src="/includes/jquery.collagePlus.js"></script>
 <script src="/includes/jquery.collagePlus.min.js"></script>
 <script type="text/javascript">
-//  document.domain = "miyafoto";
   $(document).ready(function ($) {
   
   	$.getJSON('/flickr/albums?invalidateAlbum=', function(json) {});

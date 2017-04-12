@@ -1,3 +1,8 @@
+<%@ page import="com.miyamoto.foto.service.Integration" %>
+<%
+   final String emptyPhoto = Integration.EMPTY_PHOTO;
+%>
+
 <!doctype html>
 <html xmlns:og="http://opengraphprotocol.org/schema/" xmlns:fb="http://www.facebook.com/2008/fbml" itemscope itemtype="http://schema.org/Thing" lang="en-US">
 <head>
@@ -8,12 +13,11 @@
 
 	<div id="wrapper">
 		<h5 class="recently-updated">recent</h5>
-		<img class="loading-gif" src="/includes/hex-loader.gif"/>
+		<img class="loading-gif" src="/includes/spinningwheel.gif"/>
 	</div>
 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 <script type="text/javascript">
-//  document.domain = "miyafoto";
   $(document).ready(function ($) {
 
   function moveLeft(sliderName) {
@@ -66,9 +70,9 @@
 });   
 
   var hash = window.location.hash.substring(1);
-  var photoEmpty = "15508109759";
+  var photoEmpty = "<%= emptyPhoto %>";
   var isEmpty = "";
-  //console.log("corrent to inval" + hash);
+
   $.getJSON('/flickr/albums?invalidateAlbum='+hash, function(json) {
   	$.each(json,function(c, coll){
   	  $.each(coll, function(i, value) {
@@ -77,15 +81,7 @@
   	    //console.log("writing " + i );
    		var html = "";
 		html += "<div id=\"sectionWrapper\" name=\""+ value.setId+"\">" +
-	    		"<div id=\"slider\" name=\""+ value.setId+"\">" +
-	    		/*	"<div class=\"albumTitle\">"+ value.setYear+ " " + value.setName+"</div>" + 
-	    			"<span class=\"nav-wrapper\">" + 
-	    			"<a href=\"#\" class=\"control_prev\">&#8672;</a>" +
-	    			"<span class=\"quick-view\">quick view</span>" +
-	  		    	"<a href=\"#\" class=\"control_next\">&#8674;</a></span>" + */
-					"<section class=\"imgSet\">";
-		
-		//console.log('length '+ value.setCount);
+	    		"<div id=\"slider\" name=\""+ value.setId+"\"><section class=\"imgSet\">";
 		
 		$.each(value.photos,function(photoId, data){	
 		   if (photoId != photoEmpty) {		

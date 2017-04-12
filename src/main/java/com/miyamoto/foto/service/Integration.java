@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
-import java.io.File;
 
 import org.scribe.builder.api.FlickrApi;
 import org.scribe.builder.ServiceBuilder;
@@ -18,7 +17,6 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -33,7 +31,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ConcurrentMap;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.json.JSONObject;
 import org.json.JSONArray;
@@ -56,9 +53,77 @@ import com.miyamoto.foto.service.photos.PhotoSet;
 import com.miyamoto.foto.service.files.Store;
 
 public class Integration {
+	
+	private final Logger log = LoggerFactory.getLogger(Integration.class);
+
+	// Caching static variables
+	public static final String CACHE_TYPE_TITLE = "title";
+	public static final String CACHE_TYPE_PID 	= "id";
+	public static final String CACHE_INVALIDATE = "invalidate";
+	   
+    // Used for album creation; need to change for new projects
+    public static final String EMPTY_PHOTO = "15508109759";
+    public static final String PROJECT_NAME = "miyamoto-foto";
+       
+    // Flickr Service/API calls
+    private static final String POST_UPLOAD = "https://up.flickr.com/services/upload/";
+    private static final String POST_REST   = "https://api.flickr.com/services/rest/";
+    private static final String API_QUERY_ALBUM_PHOTOS = "flickr.photosets.getPhotos";
+    private static final String API_QUERY_ALBUMS = "flickr.photosets.getList";
+    private static final String API_REMOVE_PHOTO = "flickr.photosets.removePhoto";
+    private static final String API_MOVE_PHOTO 	 = "flickr.photosets.addPhoto";
+    private static final String API_CREATE_ALBUM = "flickr.photosets.create"; 
     
-    private static final String EMPTY_PHOTO = "15508109759";
+    // Flickr service variables
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String MULTIPART	 = "multipart/form-data; boundary=";
+    private static final String METHOD		 = "method";
+    private static final String PHOTO_TITLE	 = "title";
+    private static final String PHOTO_DESC   = "description";
+    private static final String PHOTO_PRIMARY_ID = "primary_photo_id";
+    private static final String PHOTOSET_ID  = "photoset_id";
+    private static final String PHOTO_ID	 = "photo_id";
+    private static final String USER_ID      = "user_id";
+    private static final String FORMAT_TYPE	 = "format";
+    private static final String FORMAT_JSON  = "json";  
+    private static final String EXTRA_PARAMS = "extras";
+    private static final String PHOTO_EXTRAS = "url_sq, url_m, url_o, date_upload";  
     
+    // Flickr response variables
+    private static final String PHOTO = "photo";
+    private static final String PHOTOS = "photos";
+    private static final String FILENAME = "filename";
+    private static final String FILETYPE = "filemimetype";
+    private static final String PHOTOSET = "photoset";
+    private static final String PHOTOSETS = "photosets";
+    private static final String PS_TOTAL = "total";
+    private static final String PS_TITLE = "title";   
+    private static final String ID = "id";
+    private static final String SECRET = "secret";
+    private static final String TITLE = "title";
+    private static final String DATE_UPDATE = "date_update";
+    private static final String DATEUPLOAD = "dateupload";
+    private static final String CONTENT = "_content";
+    
+    // JSON static variables
+    private static final String JSON_SET_NAME = "setName";
+    private static final String JSON_SET_ID = "setId";
+    private static final String JSON_SET_TITLE = "setTitle";
+    private static final String JSON_SET_COUNT = "setCount";
+    private static final String JSON_SET_YEAR = "setYear";
+    
+    private static final String JSON_PHOTOS = "photos";
+    private static final String JSON_PHOTO_SRC = "source";
+    private static final String JSON_PHOTO_WIDTH = "width";
+    private static final String JSON_PHOTO_HEIGHT = "height";
+    private static final String JSON_RESULT = "result";
+    
+    // Photo URL size options
+    private static final String WIDTH_O = "width_o",   WIDTH_SQ = "width_sq",   WIDTH_M = "width_m";    
+    private static final String HEIGHT_O = "height_o", HEIGHT_SQ = "height_sq", HEIGHT_M = "height_m"; 
+    private static final String URL_O = "url_o", URL_SQ = "url_sq", URL_M = "url_m";       
+    
+    // Integration variables
     private ImageMeta imageMeta;
     private OAuth authorized;
     private User user;
@@ -165,13 +230,13 @@ public class Integration {
     //
     //
     public String postToFlikr() {  	
-    	OAuthRequest request = new OAuthRequest(Verb.POST, "https://up.flickr.com/services/upload/");
+    	OAuthRequest request = new OAuthRequest(Verb.POST, POST_UPLOAD);
             	
         Map<String, Object> metaParams = getParameters();
-        request.addHeader("Content-Type", "multipart/form-data; boundary=" + getMultipartBoundary());
+        request.addHeader(CONTENT_TYPE, MULTIPART + getMultipartBoundary());
         for (Map.Entry<String, Object> entry : metaParams.entrySet()) {
             String key = entry.getKey();
-            if (!key.equals("photo") && !key.equals("filename") &&  !key.equals("filemimetype")) {
+            if (!key.equals(PHOTO) && !key.equals(FILENAME) &&  !key.equals(FILETYPE)) {
                 request.addQuerystringParameter(key, String.valueOf(entry.getValue()));
             }
         }
@@ -187,9 +252,7 @@ public class Integration {
         Response scribeResponse = request.send();
         String strXml = scribeResponse.getBody();
         
-       	return strXml.replaceAll("\\<([^<>]+)\\>","").replaceAll("\\%0A","");
-        
-
+       	return cleanUploadResponse(strXml);
     }	
     
     //
@@ -200,20 +263,17 @@ public class Integration {
     public String createNewAlbum(String albumName, String albumPrefix) {
     	
     	Map<String, Object> parameters = new HashMap<String, Object>();
-		String albumTitle = albumPrefix + "-" + albumName.replaceAll(" ","-").toLowerCase(); //regex on name
+		String albumTitle = generateAlbumTitle(albumPrefix, albumName); 
+              
+        System.out.println("Creating new album with title : " + albumTitle);
+        log.info("Creating new album with title: {}", albumTitle);
         
-//DO NOT        //parameters.put("title", albumTitle);
-//NEED        //parameters.put("primary_photo_id", EMPTY_PHOTO);
-        
-        System.out.println("Creating new album with title : "+albumTitle);
-        
-    	OAuthRequest request = new OAuthRequest(Verb.POST, "https://api.flickr.com/services/rest/");
-            	  
-        request.addHeader("Content-Type", "multipart/form-data; boundary=" + getMultipartBoundary());		
-		request.addQuerystringParameter("method", "flickr.photosets.create");
-		request.addQuerystringParameter("title", albumTitle);
-		request.addQuerystringParameter("description", WordUtils.capitalize(albumName)); //regex to make capitalized
-		request.addQuerystringParameter("primary_photo_id", EMPTY_PHOTO);
+    	OAuthRequest request = new OAuthRequest(Verb.POST, POST_REST);          	  
+        request.addHeader(CONTENT_TYPE, MULTIPART + getMultipartBoundary());		
+		request.addQuerystringParameter(METHOD, API_CREATE_ALBUM);
+		request.addQuerystringParameter(PHOTO_TITLE, albumTitle);
+		request.addQuerystringParameter(PHOTO_DESC, WordUtils.capitalize(albumName)); //regex to make capitalized
+		request.addQuerystringParameter(PHOTO_PRIMARY_ID, EMPTY_PHOTO);
                
         Token requestToken = new Token(getAuthorize().getToken(), getAuthorize().getTokenSecret());
         ServiceBuilder serviceBuilder = new ServiceBuilder().provider(FlickrApi.class).apiKey(getAuthorize().getApiKey()).apiSecret(getAuthorize().getSharedSecret());
@@ -228,7 +288,7 @@ public class Integration {
         String strXml = scribeResponse.getBody();
         
         
-        String setId = strXml.replaceAll("\\n","").replaceAll("(.+id=\"|\".*)","");
+        String setId = cleanNewAlbumResponse(strXml);
         String[] extraAlbumInfo = albumPrefix.split("-");
 
         // Update title cache with new PhotoSet here. 
@@ -250,15 +310,15 @@ public class Integration {
     	
     	Map<String, Object> parameters = new HashMap<String, Object>();
 
-        parameters.put("photoset_id", photosetId);
-        parameters.put("photo_id", photoId);
+        parameters.put(PHOTOSET_ID, photosetId);
+        parameters.put(PHOTO_ID, photoId);
         
-    	OAuthRequest request = new OAuthRequest(Verb.POST, "https://api.flickr.com/services/rest/");
+    	OAuthRequest request = new OAuthRequest(Verb.POST, POST_REST);
             	  
-        request.addHeader("Content-Type", "multipart/form-data; boundary=" + getMultipartBoundary());		
-		request.addQuerystringParameter("method", "flickr.photosets.addPhoto");
-		request.addQuerystringParameter("photoset_id", photosetId);
-		request.addQuerystringParameter("photo_id", photoId);
+        request.addHeader(CONTENT_TYPE, MULTIPART + getMultipartBoundary());		
+		request.addQuerystringParameter(METHOD, API_MOVE_PHOTO);
+		request.addQuerystringParameter(PHOTOSET_ID, photosetId);
+		request.addQuerystringParameter(PHOTO_ID, photoId);
                
         Token requestToken = new Token(getAuthorize().getToken(), getAuthorize().getTokenSecret());
         ServiceBuilder serviceBuilder = new ServiceBuilder().provider(FlickrApi.class).apiKey(getAuthorize().getApiKey()).apiSecret(getAuthorize().getSharedSecret());
@@ -285,15 +345,15 @@ public class Integration {
     	
     	Map<String, Object> parameters = new HashMap<String, Object>();
 
-        parameters.put("photoset_id", photoSetId);
-        parameters.put("photo_id", photoId);
+        parameters.put(PHOTOSET_ID, photoSetId);
+        parameters.put(PHOTO_ID, photoId);
         
-    	OAuthRequest request = new OAuthRequest(Verb.POST, "https://api.flickr.com/services/rest/");
+    	OAuthRequest request = new OAuthRequest(Verb.POST, POST_REST);
             	  
-        request.addHeader("Content-Type", "multipart/form-data; boundary=" + getMultipartBoundary());		
-		request.addQuerystringParameter("method", "flickr.photosets.removePhoto");
-		request.addQuerystringParameter("photoset_id", photoSetId);
-		request.addQuerystringParameter("photo_id", photoId);
+        request.addHeader(CONTENT_TYPE, MULTIPART + getMultipartBoundary());		
+		request.addQuerystringParameter(METHOD, API_REMOVE_PHOTO);
+		request.addQuerystringParameter(PHOTOSET_ID, photoSetId);
+		request.addQuerystringParameter(PHOTO_ID, photoId);
                
         Token requestToken = new Token(getAuthorize().getToken(), getAuthorize().getTokenSecret());
         ServiceBuilder serviceBuilder = new ServiceBuilder().provider(FlickrApi.class).apiKey(getAuthorize().getApiKey()).apiSecret(getAuthorize().getSharedSecret());
@@ -327,8 +387,8 @@ public class Integration {
 	// 
 	//    
     public String albumListToJson(String selectedYear) {
-		JSONObject jsonObject = new JSONObject();							//use cache when possible
-		TreeMap<String,PhotoSet> completeList = retrieveFlickrPhotoSets("year-type-title","title");
+		JSONObject jsonObject = new JSONObject();				//use cache when possible
+		TreeMap<String,PhotoSet> completeList = retrieveFlickrPhotoSets("year-type-title",CACHE_TYPE_TITLE);
 	
 		JSONObject collObj = new JSONObject();
 		JSONArray typeArr = new JSONArray();
@@ -355,10 +415,10 @@ public class Integration {
 				
 				JSONObject setJson = new JSONObject();
 				PhotoSet ps = completeList.get(album);
-				setJson.put("setName", ps.getPhotoSetName());
-				setJson.put("setId", ps.getPhotoSetId());
-				setJson.put("setTitle", ps.getPhotoSetTitle());
-				setJson.put("setCount", ps.getPhotoSetCount());
+				setJson.put(JSON_SET_NAME, ps.getPhotoSetName());
+				setJson.put(JSON_SET_ID, ps.getPhotoSetId());
+				setJson.put(JSON_SET_TITLE, ps.getPhotoSetTitle());
+				setJson.put(JSON_SET_COUNT, ps.getPhotoSetCount());
 				typeArr.put(setJson);
 				prevType = currentType;
 			
@@ -370,7 +430,7 @@ public class Integration {
 			acc++;
 		}
 		
-		jsonObject.put("result", collObj);		
+		jsonObject.put(JSON_RESULT, collObj);		
 		return jsonObject.toString();           
     }
     
@@ -383,14 +443,14 @@ public class Integration {
     public String getPhotoSetList() {
  		long pslS = System.nanoTime();      	
 		Map<String, Object> parameters = new HashMap<String, Object>();
-        parameters.put("user_id", getUser().getUserId());
+        parameters.put(USER_ID, getUser().getUserId());
 	
-    	OAuthRequest request = new OAuthRequest(Verb.POST, "https://api.flickr.com/services/rest/");
+    	OAuthRequest request = new OAuthRequest(Verb.POST, POST_REST);
             	       
-        request.addHeader("Content-Type", "multipart/form-data; boundary=" + getMultipartBoundary());		
-		request.addQuerystringParameter("method", "flickr.photosets.getList");
-		request.addQuerystringParameter("user_id", getUser().getUserId());
-		request.addQuerystringParameter("format", "json");
+        request.addHeader(CONTENT_TYPE, MULTIPART + getMultipartBoundary());		
+		request.addQuerystringParameter(METHOD, API_QUERY_ALBUMS);
+		request.addQuerystringParameter(USER_ID, getUser().getUserId());
+		request.addQuerystringParameter(FORMAT_TYPE, FORMAT_JSON);
                 
         Token requestToken = new Token(getAuthorize().getToken(), getAuthorize().getTokenSecret());
         ServiceBuilder serviceBuilder = new ServiceBuilder().provider(FlickrApi.class).apiKey(getAuthorize().getApiKey()).apiSecret(getAuthorize().getSharedSecret());
@@ -407,6 +467,7 @@ public class Integration {
 		long pslE = System.nanoTime();
 		long pslD = (pslE - pslS)/1000000;
 		System.out.println("retrieve photo set list : "+pslD);
+		log.info("retrieve photo set list : {}", pslD);
         return strXml;          
     }
     
@@ -420,17 +481,17 @@ public class Integration {
 	public String getPhotosOfSet(String setId) {
 		long posS = System.nanoTime();    	
 		Map<String, Object> parameters = new HashMap<String, Object>();
-        parameters.put("photoset_id", setId);
+        parameters.put(PHOTOSET_ID, setId);
         
         
-    	OAuthRequest request = new OAuthRequest(Verb.POST, "https://api.flickr.com/services/rest/");     
-        request.addHeader("Content-Type", "multipart/form-data; boundary=" + getMultipartBoundary());
+    	OAuthRequest request = new OAuthRequest(Verb.POST, POST_REST);     
+        request.addHeader(CONTENT_TYPE, MULTIPART + getMultipartBoundary());
 		
 		
-		request.addQuerystringParameter("method", "flickr.photosets.getPhotos");
-		request.addQuerystringParameter("photoset_id", setId);
-		request.addQuerystringParameter("extras", "url_sq, url_m, url_o, date_upload");
-		request.addQuerystringParameter("format", "json");
+		request.addQuerystringParameter(METHOD, API_QUERY_ALBUM_PHOTOS);
+		request.addQuerystringParameter(PHOTOSET_ID, setId);
+		request.addQuerystringParameter(EXTRA_PARAMS, PHOTO_EXTRAS);
+		request.addQuerystringParameter(FORMAT_TYPE, FORMAT_JSON);
               
         Token requestToken = new Token(getAuthorize().getToken(), getAuthorize().getTokenSecret());
         ServiceBuilder serviceBuilder = new ServiceBuilder().provider(FlickrApi.class).apiKey(getAuthorize().getApiKey()).apiSecret(getAuthorize().getSharedSecret());
@@ -447,7 +508,8 @@ public class Integration {
 		long posE = System.nanoTime();
 		long posD = (posE - posS)/1000000;
 		System.out.println("getPhotosOfSet()->function time: "+posD);
-
+		log.info("getPhotosOfSet()->function time: {}", posD);
+		
         return strXml;    
     }
     
@@ -466,10 +528,10 @@ public class Integration {
     //
     //
     public String psToJson(PhotoSet ps) {
-        JSONObject setJson = new JSONObject();		//TODO: fill these values 
-    	setJson.put("setTitle", ps.getPhotoSetTitle());
-    	setJson.put("setName", ps.getPhotoSetName());
-    	setJson.put("setYear", ps.getSetYear());
+        JSONObject setJson = new JSONObject(); 
+    	setJson.put(JSON_SET_TITLE, ps.getPhotoSetTitle());
+    	setJson.put(JSON_SET_NAME, ps.getPhotoSetName());
+    	setJson.put(JSON_SET_YEAR, ps.getSetYear());
     	
     	// create descending iterator
      	Iterator<Photo> photosDescending = ps.getPhotoSet().descendingIterator();
@@ -480,14 +542,14 @@ public class Integration {
 				JSONObject cropJson = new JSONObject();
 				for (Crop crop : p.getCropList()) {
 					JSONObject cropInfo = new JSONObject();
-					cropInfo.put("source",crop.getCropSrc());
-					cropInfo.put("width", crop.getWidth());
-					cropInfo.put("height", crop.getHeight());
+					cropInfo.put(JSON_PHOTO_SRC,crop.getCropSrc());
+					cropInfo.put(JSON_PHOTO_WIDTH, crop.getWidth());
+					cropInfo.put(JSON_PHOTO_HEIGHT, crop.getHeight());
 					cropJson.put(crop.getCropLabel(), cropInfo);
 				}
 				photoJson.put(p.getPhotoId(), cropJson);
 			}
-			setJson.put("photos", photoJson);
+			setJson.put(JSON_PHOTOS, photoJson);
 				
 		return setJson.toString();  
     }
@@ -536,11 +598,11 @@ public class Integration {
 		for (String album : completeStuff.descendingKeySet()) {
 			JSONObject setJson = new JSONObject();
 			PhotoSet ps = completeStuff.get(album);
-			setJson.put("setName", ps.getPhotoSetName());
-			setJson.put("setId", ps.getPhotoSetId());
-			setJson.put("setTitle", ps.getPhotoSetTitle());
-			setJson.put("setCount", ps.getPhotoSetCount());
-			setJson.put("setYear", ps.getSetYear());
+			setJson.put(JSON_SET_NAME, ps.getPhotoSetName());
+			setJson.put(JSON_SET_ID, ps.getPhotoSetId());
+			setJson.put(JSON_SET_TITLE, ps.getPhotoSetTitle());
+			setJson.put(JSON_SET_COUNT, ps.getPhotoSetCount());
+			setJson.put(JSON_SET_YEAR, ps.getSetYear());
 			
 			// create descending iterator
      		Iterator<Photo> photosDescending = ps.getPhotoSet().descendingIterator();
@@ -551,18 +613,18 @@ public class Integration {
 				JSONObject cropJson = new JSONObject();
 				for (Crop crop : p.getCropList()) {
 					JSONObject cropInfo = new JSONObject();
-					cropInfo.put("source",crop.getCropSrc());
-					cropInfo.put("width", crop.getWidth());
-					cropInfo.put("height", crop.getHeight());
+					cropInfo.put(JSON_PHOTO_SRC,crop.getCropSrc());
+					cropInfo.put(JSON_PHOTO_WIDTH, crop.getWidth());
+					cropInfo.put(JSON_PHOTO_HEIGHT, crop.getHeight());
 					cropJson.put(crop.getCropLabel(), cropInfo);
 				}
 				photoJson.put(p.getPhotoId(), cropJson);
 			}
-			setJson.put("photos", photoJson);
+			setJson.put(JSON_PHOTOS, photoJson);
 			collArray.put(setJson);
 		}
 		
-		jsonObject.put("result", collArray);		
+		jsonObject.put(JSON_RESULT, collArray);		
 		return jsonObject.toString();           
     }
     
@@ -573,39 +635,41 @@ public class Integration {
     //
     public PhotoSet parsePhotoSetResponse(String setId, String setTitle, String setDesc, String photoJsonString, String dateOfSet) {    
 		JSONObject photosJson = new JSONObject(photoJsonString);
-		JSONObject photosObject = photosJson.getJSONObject("photoset");
+		JSONObject photosObject = photosJson.getJSONObject(PHOTOSET);
 		
-		int photoCount = Integer.parseInt(photosObject.get("total").toString());
-		String photoSetTitle = photosObject.get("title").toString();
+		int photoCount = Integer.parseInt(photosObject.get(PS_TOTAL).toString());
+		String photoSetTitle = photosObject.get(PS_TITLE).toString();
 		
 		/*
 		PhotoSet aPhotoSet = AlbumSetCache.INSTANCE.hasTitle(photoSetTitle) && !dateOfSet.isEmpty() ? 
 							 AlbumSetCache.INSTANCE.getByTitle(photoSetTitle) :
 							 new PhotoSet(setId, setTitle, setDesc, photoCount, dateOfSet);
 		*/
-		System.out.println(setTitle + " " + setDesc + " " + dateOfSet);
+		
+		//System.out.println(setTitle + " " + setDesc + " " + dateOfSet);
+		log.debug("{} {} {}", setTitle, setDesc, dateOfSet);
 		PhotoSet aPhotoSet = new PhotoSet(setId, setTitle, setDesc, photoCount, dateOfSet);
 					
-		JSONArray photosArr = photosObject.getJSONArray("photo");
+		JSONArray photosArr = photosObject.getJSONArray(PHOTO);
 		
 		// TODO: Pull the date in extras, check against the date and create a chron list
 		// "date_upload" is the key
 		for (int k = 0; k < photoCount; k++) {
 			JSONObject photoOne = (JSONObject) photosArr.get(k);
-			String photoId = photoOne.get("id").toString();
-			String photoSecret = photoOne.get("secret").toString();
-			String photoTitle = photoOne.get("title").toString();
-			String photoUpdated = photoOne.get("dateupload").toString(); 
+			String photoId = photoOne.get(ID).toString();
+			String photoSecret = photoOne.get(SECRET).toString();
+			String photoTitle = photoOne.get(TITLE).toString();
+			String photoUpdated = photoOne.get(DATEUPLOAD).toString(); 
 	
-			double w = Double.parseDouble(photoOne.get("width_m").toString());
-			double h = Double.parseDouble(photoOne.get("height_m").toString());
+			double w = Double.parseDouble(photoOne.get(WIDTH_M).toString());
+			double h = Double.parseDouble(photoOne.get(HEIGHT_M).toString());
 			double photoAspect = w/h;
 			
-			String url_c = getLargeSrcUrl(photoOne.get("url_m").toString());
+			String url_c = getLargeSrcUrl(photoOne.get(URL_M).toString());
 			Photo aPhoto = new Photo(photoId, photoSecret, photoTitle, photoAspect, Integer.parseInt(photoUpdated));
-			aPhoto.addSquareCrop(photoOne.get("url_sq").toString(), photoOne.get("width_sq").toString(), photoOne.get("height_sq").toString());  
-			aPhoto.addMediumCrop(photoOne.get("url_m").toString(), photoOne.get("width_m").toString(), photoOne.get("height_m").toString());    
-			aPhoto.addOriginal(photoOne.get("url_o").toString(), photoOne.get("width_o").toString(), photoOne.get("height_o").toString());
+			aPhoto.addSquareCrop(photoOne.get(URL_SQ).toString(), photoOne.get(WIDTH_SQ).toString(), photoOne.get(HEIGHT_SQ).toString());  
+			aPhoto.addMediumCrop(photoOne.get(URL_M).toString(), photoOne.get(WIDTH_M).toString(), photoOne.get(HEIGHT_M).toString());    
+			aPhoto.addOriginal(photoOne.get(URL_O).toString(), photoOne.get(WIDTH_O).toString(), photoOne.get(HEIGHT_O).toString());
 			aPhoto.addLargeCrop(url_c, "800", "600");
 			aPhotoSet.addPhotoToSet(aPhoto);  
 		}
@@ -625,8 +689,8 @@ public class Integration {
     	TreeMap<String,PhotoSet> entireCollection = new TreeMap<String,PhotoSet>();
     	
     	//speed up if keys are in cache for cacheType "title"
-    	if (cacheType.equalsIgnoreCase("title") && AlbumSetCache.INSTANCE.hasTitles() &&
-    			!invalidate.equalsIgnoreCase("invalidate")) {
+    	if (cacheType.equalsIgnoreCase(CACHE_TYPE_TITLE) && AlbumSetCache.INSTANCE.hasTitles() &&
+    			!invalidate.equalsIgnoreCase(CACHE_INVALIDATE)) {
     		entireCollection.putAll(AlbumSetCache.INSTANCE.getTitles());
     		return entireCollection;
     	}
@@ -636,31 +700,32 @@ public class Integration {
 		long pslE = System.nanoTime();
 		long pslD = (pslE - pslS)/1000000;
 		System.out.println("getPhotoSetList()->function time: "+pslD);
+		log.info("getPhotoSetList()->function time: {}", pslD);
 
 		long plS = System.nanoTime();
         JSONObject setListJson = new JSONObject(photoSetListString);
-        JSONObject setListObject = setListJson.getJSONObject("photosets");
+        JSONObject setListObject = setListJson.getJSONObject(PHOTOSETS);
         
-        int setCount = Integer.parseInt(setListObject.get("total").toString());        
-        JSONArray setArr = setListObject.getJSONArray("photoset");
+        int setCount = Integer.parseInt(setListObject.get(PS_TOTAL).toString());        
+        JSONArray setArr = setListObject.getJSONArray(PHOTOSET);
         
         // Scan PhotoSetList
         for (int i = 0; i < setCount; i++) {			
 			JSONObject photoSetOne = (JSONObject) setArr.get(i);
-			String setId = photoSetOne.get("id").toString();
-			String dateUpdate =  photoSetOne.get("date_update").toString();                    // <--- order! long date val
-			String setTitle = photoSetOne.getJSONObject("title").get("_content").toString();
-			String setDesc = photoSetOne.getJSONObject("description").get("_content").toString();
+			String setId = photoSetOne.get(ID).toString();
+			String dateUpdate =  photoSetOne.get(DATE_UPDATE).toString();    // <--- order! long date val
+			String setTitle = photoSetOne.getJSONObject(PS_TITLE).get(CONTENT).toString();
+			String setDesc = photoSetOne.getJSONObject(PHOTO_DESC).get(CONTENT).toString();
 			String setYear = setTitle.replaceAll("-.+","");
 			String setType = setTitle.split("-")[1];
-			int count = (Integer)photoSetOne.get("photos");
+			int count = (Integer)photoSetOne.get(PHOTOS);
 			
 			PhotoSet aPhotoSet;
 			
 			//
 			// If we are invalidating a specific photoSetId in the complete indv cache
 			//
-			if (cacheType.equalsIgnoreCase("id")){
+			if (cacheType.equalsIgnoreCase(CACHE_TYPE_PID)){
 				if (AlbumSetCache.INSTANCE.hasKey(setId) && !invalidate.equals(setId)) {
 					aPhotoSet = AlbumSetCache.INSTANCE.getPhotoSet(setId);
 				} else {
@@ -675,7 +740,7 @@ public class Integration {
 			//
 			// If we are invalidating the list version for menu/navigation
 			//	
-			} else if (cacheType.equalsIgnoreCase("title")) {			
+			} else if (cacheType.equalsIgnoreCase(CACHE_TYPE_TITLE)) {			
 				if (AlbumSetCache.INSTANCE.hasTitle(setTitle)) {
 					aPhotoSet = AlbumSetCache.INSTANCE.getByTitle(setTitle);
 				} else {
@@ -692,10 +757,38 @@ public class Integration {
 		long plE = System.nanoTime();
 		long plD = (plE - plS)/1000000;
 		System.out.println("retrieveFlickrPhotoSets()->function time: "+plD);
+		log.info("retrieveFlickrPhotoSets()->function time: {}", plD);
 
     	return entireCollection;
     }
     
+
+	//
+	//
+	// Helper: Clean Flickr Image Upload response string
+	//
+	//
+	private String cleanUploadResponse(String strXml) {
+		return strXml.replaceAll("\\<([^<>]+)\\>","").replaceAll("\\%0A","");
+	}
+	
+	//
+	//
+	// Helper: Clean Flickr New Album response string
+	//
+	//
+	private String cleanNewAlbumResponse(String strXml) {
+	 	return strXml.replaceAll("\\n","").replaceAll("(.+id=\"|\".*)","");
+	}
+
+	//
+	//
+	// Helper: Generate album title from name
+	//
+	//
+	private String generateAlbumTitle(String prefix, String name) {
+		return prefix + "-" + name.replaceAll(" ","-").toLowerCase(); //regex on name
+	}
     
     //
     //
@@ -736,6 +829,7 @@ public class Integration {
             }
         } catch (IOException e) {
             System.out.println(e.getMessage());
+            log.error("{}", e.getMessage());
         }
 
         return buffer.toByteArray();

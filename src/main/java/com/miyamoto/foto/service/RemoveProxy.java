@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.miyamoto.foto.service.AuthProxy;
 import com.miyamoto.foto.service.Integration;
+import com.miyamoto.foto.service.ProxyConstants;
 
 @WebServlet(
         name = "RemoveProxy",
@@ -30,9 +31,9 @@ public class RemoveProxy extends HttpServlet {
 	@Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {		
 		try { 
-			if (request.getParameter("photoId") != null && request.getParameter("photoSetId") != null && AuthProxy.canRemove(request)) {
-		  		String photoSetId = request.getParameter("photoSetId");
-          		String photoId = request.getParameter("photoId");
+			if (request.getParameter(ProxyConstants.PHOTO_ID) != null && request.getParameter(ProxyConstants.PHOTOSET_ID) != null && AuthProxy.canRemove(request)) {
+		  		String photoSetId = request.getParameter(ProxyConstants.PHOTOSET_ID);
+          		String photoId = request.getParameter(ProxyConstants.PHOTO_ID);
 		  		Integration ppl = new Integration();
 		  		String resStr = ppl.removePhotoFromAlbum(photoSetId, photoId);
 		  		System.out.println(resStr);

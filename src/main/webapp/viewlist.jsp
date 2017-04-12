@@ -6,8 +6,8 @@
 </head>
   
 <body>
-<p class="helperText pad30">Viewing Albums</p>
-<div id="albumYearSelect"><span class="helperText">Year: </span></div>
+<p class="helperText pad30 pad27">Viewing Albums</p>
+<div id="albumYearSelect"><span class="helperText pad27">Year: </span></div>
 <div id="accordian" name="photoSets">
 	<ul>
 		

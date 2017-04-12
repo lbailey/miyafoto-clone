@@ -1,6 +1,8 @@
-<%@ page import="com.miyamoto.foto.service.AuthProxy" %>
+<%@ page import="com.miyamoto.foto.service.AuthProxy,
+				 com.miyamoto.foto.service.Integration" %>
 <%
    boolean canRemove = AuthProxy.canRemove(request);
+   final String emptyPhoto = Integration.EMPTY_PHOTO;
 %>
 
 <!doctype html>
@@ -28,9 +30,7 @@
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 <script src="/includes/jquery.collagePlus.min.js"></script>
 <script src="/includes/jquery.collageCaption.min.js"></script>
-<!--<script src="/includes/jquery.collagePlus.js"></script>-->
-<script type="text/javascript">
-  //document.domain = "miyafoto";  
+<script type="text/javascript">  
 $(document).ready(function ($) {
 	
 	var innerWidth = $("#canvas").innerWidth();
@@ -41,41 +41,11 @@ $(document).ready(function ($) {
 	var hash = window.location.hash.substring(1);
 	var oSrc, oWidth, oHeight;	
 	var mSrc, mWidth, mHeight;
-	var photoEmpty = "15508109759";
+	var photoEmpty = "<%= emptyPhoto %>";
 	var imgCt = 0;	
 	
 	var setName, setYear, setTitle;
 	var canRemove = <%= canRemove %>;
-/*
-    $.getJSON('/flickr/albums?photoSetId='+hash, function(json) {
-      	
-      setName = json.setName;
-      setYear = json.setYear;
-      var htmlCollage = "";
-		
-		$.each(json.photos, function(photoId, data) {
-		    if (photoId != photoEmpty) {	
-			$.each(data,function(size, crops){
-				if (size == 'Large') {
-					cSrc = crops.source;
-				}
-				if (size === 'Medium') {
-					mSrc = crops.source;
-					mWidth = crops.width;
-					mHeight = crops.height;
-				}
-			});
-					
-			htmlCollage += "<img src=\"" + mSrc +"\"  csource=\""+ cSrc + "\" />";
-			imgCt++;	
-			} 			
-		  }); 
-		  
-		$("#collage").html(htmlCollage);
-		$("#albumTitleInfo").html(setYear+ " " + setName);
-	  
-	});
-*/
 	var htmlCollage = "";
 
     $.ajax({
@@ -119,12 +89,9 @@ $(document).ready(function ($) {
 			
 			if (Object.keys(json.photos).length == 1) {
 			  $("#albumTitleInfo").append(" - empty");
-			}
-		  
-			
-		}/*, complete: function() {
-		setTimeout(collage, 100);
-		}*/
+			  $(".loading-gif").hide();
+			}	
+		}
     });	
     
     $("#canvas").on("click", "div > div > div > div > div > a.delete-img", function (e) {
@@ -142,48 +109,9 @@ $(document).ready(function ($) {
                 		setTimeout(collage, 300);
                 		nxt();
             		});
-    		        //now literally remove or fade out the image from the gallery
-  		    });
-  		}
-	});
-    
-    
-/*    
-	$("#canvas").on("click", "div > ul > li", function (event) {
-		event.preventDefault();
-
-		var lightbox = '<div id="lightbox">' +
-		'<div id="content">' + 
-		'<img src="' + $(this).attr( "csource" ) +'" style="height: '+viewheight/3+'px; margin-top: '+ viewheight/32 +'px;" />' + 
-		'<span class="zoomed"></span></img></div>' +	
-		'</div>';
-		$('body', window.parent.document).append(lightbox);
-	});
-	
-	$("#canvas").on("click", "div > div > img", function (event) {
-		event.preventDefault();
-
-		var lightbox = '<div id="lightbox">' +
-		'<div id="content">' + 
-		'<img src="' + $(this).attr( "csource" ) +'" style="height: '+viewheight/3+'px; margin-top: '+ viewheight/32 +'px;" />' + 
-		'<span class="zoomed"></span></img></div>' +	
-		'</div>';
-		$('body', window.parent.document).append(lightbox);
-	});
-	
-	$('body', window.parent.document).on("click", function (event) {
-		$('body', window.parent.document).on("click", "div#lightbox", function() {
-			$(this).hide();
-		});
-		return false;
-	});
-
-	$(".downloadAll").on("click", function (event) {
-		// download all files as zip
-		return false;
-	});
-	
-	*/
+  		    	});
+  			}
+	  });
 }); 
 
 // dom needs to be fully loaded

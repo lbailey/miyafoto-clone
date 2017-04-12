@@ -6,8 +6,8 @@
 </head>
   
 <body>
-<p class="helperText pad30">Upload to Album</p>
-<div id="albumYearSelect"><span class="helperText">Year: </span></div>
+<p class="helperText pad30 pad27">Upload to Album</p>
+<div id="albumYearSelect"><span class="helperText pad27">Year: </span></div>
 <div id="accordian" name="photoSets">
 	<ul>
 		
@@ -174,7 +174,7 @@ $(document).ready(function(){
 		event.preventDefault();
 		var $form = $(this),
 			$list = $form.parents().eq(2),
-    		albumEntry = $form.find("input[name='albumName']").val(),
+    		albumEntry = $form.find("input[name='albumName']").val().replace(/[^a-z0-9\s]/gi, ''),
     		albumPrefix = $('#albumYear').val() + "-" + $list.children('p').text().toLowerCase(),
     		url = $form.attr("action");
     		
