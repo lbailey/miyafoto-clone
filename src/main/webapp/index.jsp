@@ -39,11 +39,8 @@ if(AuthProxy.isAuthorized(request)) {
 </section>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 <script>
-// Attach a submit handler to the form
-$( "#logIn" ).submit(function( event ) {
+$("#logIn").submit(function(event) {
 
-	console.log("wheee"); 
-  // Stop form from submitting normally
   event.preventDefault(); 
   // Get some values from elements on the page:
   
