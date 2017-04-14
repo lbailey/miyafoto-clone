@@ -52,6 +52,8 @@ $(document).ready(function(){
 		  $.each(json,function(c, coll){
 		 // console.log(year + " size: " + Object.keys(coll).length  + " " + Object.keys(coll) + $.isEmptyObject(coll));
 			$.each(coll, function(photoType, photoSet) {
+			
+			if ($.inArray(photoType, typeSet) >= 0) {
 			  var html = "<li><p>" + photoType + "</p><ul>";      
 			  $.each(photoSet, function(i, album) {   
 				html += "<li><a href=\"#\" photoSetId=\""+album.setId+"\">"+album.setName+"</a></li>";             
@@ -63,12 +65,11 @@ $(document).ready(function(){
 			  html += "</ul></li>";
 		
 			  $("#accordian > ul").append(html);   
-			  //$("#accordian > ul > li:nth-child(2) > p").next().slideDown();		
+
+			  }		
 			});
 		    
-		    if (Object.keys(coll).length < 6) {
-		      difference = $.grep(typeSet,function(x) {return $.inArray(x, Object.keys(coll)) < 0});
-		    } 
+		   difference = $.grep(typeSet,function(x) {return $.inArray(x, Object.keys(coll)) < 0});
 
 		   
 		   //if difference has stuff
@@ -143,7 +144,7 @@ $(document).ready(function(){
         //var folders = window.parent.document.getElementById('right');
 		//folders.src = folders.src;
 		var folders = window.parent.document.getElementById('right');
-		folders.src = "http://"+$(location).attr('host') + "/folders.jsp#"+photoSetId;
+		folders.src = $(location).attr('protocol')+"//"+$(location).attr('host') + "/folders.jsp#"+photoSetId;
 		console.log(folders.src);
 		folders.contentWindow.location.reload();
 		folders.src = folders.src;
@@ -162,7 +163,7 @@ $(document).ready(function(){
     //
 	function loadCenter() {
     	var viewport = window.parent.document.getElementById('center');
-		viewport.src = "http://"+$(location).attr('host') + "/success.jsp";
+		viewport.src = $(location).attr('protocol')+"//"+$(location).attr('host') + "/success.jsp";
 		console.log(viewport.src);
 		viewport.contentWindow.location.reload();
 		viewport.src = viewport.src;

@@ -65,11 +65,11 @@
   	$.getJSON('/flickr/albums?invalidateAlbum=', function(json) {});
 
     $("#introPage").on("click", function () {
-		$( '#center-wide' ).attr( 'src', function ( i, val ) { return "http://"+$(location).attr('host') + "/intro.jsp"; });
+		$( '#center-wide' ).attr( 'src', function ( i, val ) { return $(location).attr('protocol')+"//"+$(location).attr('host') + "/intro.jsp"; });
     });
     
     $("#uploadSection").on("click", function () {
-    	window.location.href = "http://"+$(location).attr('host') + "/index-upload.jsp";
+    	window.location.href = $(location).attr('protocol')+"//"+$(location).attr('host') + "/index-upload.jsp";
     });
     
     $("#logoutButton").on("click", function() {

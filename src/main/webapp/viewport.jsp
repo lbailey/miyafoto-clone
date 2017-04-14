@@ -137,7 +137,7 @@ $(window).bind('resize', function() {
 });
 
 $(window).bind('load', function() {
-	var time = $("#collage").children().size() * 50;
+	var time = $("#collage").children().size() * 150;
     setTimeout(collage, 1000 + time);
 });
 

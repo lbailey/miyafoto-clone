@@ -483,6 +483,7 @@ section.login-wrapper .form .message {
     width: 155px;
     height: 75px;
     cursor: pointer;
+    white-space: nowrap;
 }
 
 #slider .title-overlay > span.title,
@@ -493,6 +494,8 @@ display: block;
     letter-spacing: .5px;
     top: 75px;
     position: relative;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 #slider div.title-overlay::before {
@@ -797,6 +800,7 @@ span.zoomed::before {
   background-color: #bbb;
   border-left: 5px solid #78260c;
   color: #fff;
+  overflow: hidden;
 }
 #accordian ul li ul a.selected::after {
   font-weight: bold;

@@ -68,11 +68,11 @@
   $(document).ready(function ($) {
 
     $("#introPage").on("click", function () {
-		$( '#center' ).attr( 'src', function ( i, val ) { return "http://"+$(location).attr('host') + "/intro.jsp"; });
+		$( '#center' ).attr( 'src', function ( i, val ) { return $(location).attr('protocol')+"//"+$(location).attr('host') + "/intro.jsp"; });
     });
     
     $("#viewSection").on("click", function () {
-    	window.location.href = "http://"+$(location).attr('host') + "/index-view.jsp";
+    	window.location.href = $(location).attr('protocol')+"//"+$(location).attr('host') + "/index-view.jsp";
     });
     
     $("#logoutButton").on("click", function() {

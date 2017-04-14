@@ -50,23 +50,26 @@ $(document).ready(function(){
 		var year = $("#albumYearSelect").find(":selected").text();
 		$.getJSON('/flickr/albums?albumYear='+year, function(json) {
 		  $.each(json,function(c, coll){
-		   console.log(year + " size: " + Object.keys(coll).length  + " " + Object.keys(coll) + $.isEmptyObject(coll));
+//		   console.log(year + " size: " + Object.keys(coll).length  + " " + Object.keys(coll) + " " + $.isEmptyObject(coll) + " " + c);
 			$.each(coll, function(photoType, photoSet) {
-			  var html = "<li><p>" + photoType + "</p><ul>";      
-			  $.each(photoSet, function(i, album) {   
-				html += "<li><a href=\"#\" photoSetId=\""+album.setId+"\">"+album.setName+"</a></li>";             
-			  });
+			
+//			  console.log("type " + photoType + "is here " + $.inArray(photoType, typeSet) );
+			  if ($.inArray(photoType, typeSet) >= 0) {
+			
+			    var html = "<li><p>" + photoType + "</p><ul>";      
+			    $.each(photoSet, function(i, album) {   
+				  html += "<li><a href=\"#\" photoSetId=\""+album.setId+"\">"+album.setName+"</a></li>";             
+			    });
 		 
-			  html += "</ul></li>";
+			    html += "</ul></li>";
 		
-			  $("#accordian > ul").append(html);  			   
-			  //$("#accordian > ul > li:nth-child(2) > p").next().slideDown();		 
+			    $("#accordian > ul").append(html);  			   
+			  }		 
 			});
 			
-			if (Object.keys(coll).length < 6) {
-		      difference = $.grep(typeSet,function(x) {return $.inArray(x, Object.keys(coll)) < 0});
-		    } 
-			console.log(difference);
+		    difference = $.grep(typeSet,function(x) {
+		      return $.inArray(x, Object.keys(coll)) < 0;
+		    });
 		   
 		   //if difference has stuff
 		   if (!$.isEmptyObject(difference)) {
@@ -106,7 +109,7 @@ $(document).ready(function(){
     
     $("#accordian").on("click", "ul > li > ul > li > a", function () {
         var viewport = window.parent.document.getElementById('center-wide');
-		viewport.src = "http://"+$(location).attr('host') + "/viewport.jsp#"+photoSetId;
+		viewport.src = $(location).attr('protocol')+"//"+$(location).attr('host') + "/viewport.jsp#"+photoSetId;
 		console.log(viewport.src);
 		viewport.contentWindow.location.reload();
 		viewport.src = viewport.src;
