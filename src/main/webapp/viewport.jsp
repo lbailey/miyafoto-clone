@@ -12,7 +12,6 @@
 
 </head>
   <body style="padding: 28px 20px 0 0;">
-  
     <div id="canvasWrapper">
     	<div id="canvas" style="padding: 20px 0 20px 0; top: 15px;">
 		
