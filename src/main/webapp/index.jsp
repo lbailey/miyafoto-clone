@@ -39,18 +39,20 @@ if(AuthProxy.isAuthorized(request)) {
 </section>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 <script>
+
+$(document).ready(function ($) {
+  	$.getJSON('/flickr/albums?invalidateAlbum=', function(json) {});
+});
+
 $("#logIn").submit(function(event) {
 
   event.preventDefault(); 
-  // Get some values from elements on the page:
-  
   
   var $form = $( this ),
     user = $form.find( "input[name='userId']" ).val(),
     pass = $form.find( "input[name='userPass']" ).val(),
     url = $form.attr( "action" );
     
- console.log(url);
  
   // Send the data using post
   var posting = $.post( url, { userId: user, userPass: pass } );

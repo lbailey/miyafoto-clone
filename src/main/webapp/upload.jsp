@@ -129,14 +129,17 @@ $(document).ready(function(){
     allowedTypes:"jpg,jpeg,png,gif",
     multiple: true,
     onSubmit:function(responseData,files) {
-        $("#status").html("<div style='color:red;margin:15px;'>Uploading...</div>");
-        $('#status').insertAfter("#mulitplefileuploader");
+        $("#status").show();
+        $("#status span.status-uploading").html("Uploading ");
+        $("#status span.upload-counter").html("1");
+        $("#status").css("color", "red");
     },
     onSuccess:function(files,responseData,xhr) {
         $.post( "/flickr/albums", { photoSetId: photoSetId, photoId: responseData.trim() } );
     },
     afterUploadAll:function() {
-        $("#status").html("<div style='color:green;margin:15px;'>Upload successful</div>");
+        $("#status span.status-uploading").html("Successfully Uploaded ");
+        $("#status").css("color", "green");
 		$('#ajax-upload').parent().find("input[type=file]").val("");
 		$('#ajax-upload').parent().css({"display":"block"});
         //$('#right').contentWindow.location.reload(true);

@@ -97,6 +97,7 @@
 		$("#wrapper > img").css({"display": "none"});
 		$("#wrapper").append(html);
 		}
+		return i<14;
     });
   });
 });

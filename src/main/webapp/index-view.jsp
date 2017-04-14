@@ -61,8 +61,6 @@
 <script src="/includes/jquery.collagePlus.min.js"></script>
 <script type="text/javascript">
   $(document).ready(function ($) {
-  
-  	$.getJSON('/flickr/albums?invalidateAlbum=', function(json) {});
 
     $("#introPage").on("click", function () {
 		$( '#center-wide' ).attr( 'src', function ( i, val ) { return $(location).attr('protocol')+"//"+$(location).attr('host') + "/intro.jsp"; });
