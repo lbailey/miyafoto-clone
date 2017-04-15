@@ -5,9 +5,9 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.example</groupId>
   <version>1.0-SNAPSHOT</version>
-	<artifactId>miyamoto</artifactId>
+	<artifactId>miyaclone</artifactId>
 	<packaging>bundle</packaging>
-	<name>Miyamoto Flickr Integration</name>
+	<name>Miyamoto Clone Flickr Integration</name>
 	<description>Common classes and interfaces [build:${build.number}]</description>
 	<build>
 	<plugins>
