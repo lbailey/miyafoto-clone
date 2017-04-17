@@ -62,8 +62,8 @@ public class Integration {
 	public static final String CACHE_INVALIDATE = "invalidate";
 	   
     // Used for album creation; need to change for new projects
-    public static final String EMPTY_PHOTO = "15508109759";
-    public static final String PROJECT_NAME = "miyamoto-foto";
+    public static final String EMPTY_PHOTO = "33918511672";
+    public static final String PROJECT_NAME = "miyafoto-clone";
        
     // Flickr Service/API calls
     private static final String POST_UPLOAD = "https://up.flickr.com/services/upload/";
@@ -188,23 +188,16 @@ public class Integration {
 	//
 	//
 	// OAuth call to Flickr, authorize all transactions. To get these vals, use separate script located at ROOT directory
-	// TODO: Call these secret vals from server file
 	//
 	//
     public Integration() throws IOException {
     	this.authorized = new OAuth(Store.getOAuthFilePath());
     	this.user = authorized.new User(Store.getUserAuthFilePath());
-    	
-    	//this.authorized = new OAuth("72157647029609305-838676ff0f16554f","8c281edcae082331","eccbfec6885f6adefb2fd063dce81a20","b114d59e550cf4e9", Permission.DELETE);
-    	//this.user = authorized.new User("126576272@N06","miyamoto.foto","Lindsay Papp"); 
     }
     
     public Integration(ImageMeta imageMeta) throws IOException {	
         this.authorized = new OAuth(Store.getOAuthFilePath());
     	this.user = authorized.new User(Store.getUserAuthFilePath());
-    
- //   	this.authorized = new OAuth("72157647029609305-838676ff0f16554f","8c281edcae082331","eccbfec6885f6adefb2fd063dce81a20","b114d59e550cf4e9", Permission.DELETE);
- //   	this.user = authorized.new User("126576272@N06","miyamoto.foto","Lindsay Papp"); 
     	this.imageMeta = imageMeta;
     }
     

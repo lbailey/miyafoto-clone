@@ -46,6 +46,7 @@ $(document).ready(function ($) {
 	var setName, setYear, setTitle;
 	var canRemove = <%= canRemove %>;
 	var htmlCollage = "";
+	var isEmpty;
 
     $.ajax({
         url: '/flickr/albums?photoSetId='+hash,
@@ -81,15 +82,21 @@ $(document).ready(function ($) {
 				imgCt++;	
 				} 			
 			  }); 
-			
+			  
+			isEmpty = Object.keys(json.photos).length == 1;
+		},
+		complete: function() {
 			$("#collage").html(htmlCollage);
 			$("#albumTitleInfo").html(setYear+ " " + setName);
 			$("#albumTitleInfo").css({visibility:"visible"});
 			
-			if (Object.keys(json.photos).length == 1) {
+			if (isEmpty) {
 			  $("#albumTitleInfo").append(" - empty");
 			  $(".loading-gif").hide();
-			}	
+			}
+			
+			var time = $("#collage").children().size() * 100;
+    		setTimeout(collage, 1000 + time);
 		}
     });	
     
@@ -133,11 +140,6 @@ $(window).bind('resize', function() {
     $('#collage .image-wrapper').css("opacity", 0);
     if (resizeTimer) clearTimeout(resizeTimer);
     resizeTimer = setTimeout(collage, 200);
-});
-
-$(window).bind('load', function() {
-	var time = $("#collage").children().size() * 150;
-    setTimeout(collage, 1000 + time);
 });
 
 

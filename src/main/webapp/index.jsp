@@ -29,7 +29,7 @@ if(AuthProxy.isAuthorized(request)) {
 <div class="login-body"></div>
 <section class="login-wrapper">
   <div class="form">
-  <h2>miya<span class="add">moto</span>-foto</h2>
+  <h2>miya<span class="add">foto</span>-clone</h2>
     <form id="logIn" class="login-form" action="/flickr/authorize">
       <input id="userId" name="userId" type="text" placeholder="username"/>
       <input id="userPass" name="userPass" type="password" placeholder="password"/>

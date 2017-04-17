@@ -35,10 +35,13 @@ public class Store {
 	private static final String OAUTH_FILE_PATH = "store/oauth.txt";
 	private static final String USER_AUTH_FILE_PATH = "store/userauth.txt";
 	
+	//
+	// TODO: replace these for level-identifiers, not actual logins
+	//
 	public enum Login {    			//permission levels
     	ADMIN 			("admin",   4),
-    	UPLOADER	 	("maiko",   2),
-    	DELETER 		("geisha",  3),
+    	UPLOADER	 	("morty",   2),
+    	DELETER 		("rick",  	3),
     	DEFAULT 		("default", 1),
     	NONE			("none",	0);
 
@@ -118,7 +121,13 @@ public class Store {
     	} else return false;
     }
     
-    private static void writeFile(HashMap<String,String> userLogins) throws IOException  {  
+    //
+    //
+    // Writes usernames and passwords to /store/ in plain text 
+    // TODO: really should use encryption here
+    //
+    //
+    public static void writeFile(HashMap<String,String> userLogins) throws IOException  {  
     
     	Files.write(Paths.get(USER_PATH), "".getBytes(),StandardOpenOption.CREATE,StandardOpenOption.TRUNCATE_EXISTING );
      	Files.write(Paths.get(USER_PASS_PATH), "".getBytes(),StandardOpenOption.CREATE,StandardOpenOption.TRUNCATE_EXISTING );
@@ -139,7 +148,13 @@ public class Store {
     	}
     }
     
-    private static void writeOAuth(HashMap<String,String> oAuthVars, String filePath) throws IOException  {  
+    //
+    //
+    // Writes OAuth setup response to file in /store/
+    // TODO: really should not be public; write better/protected accessor
+    //
+    //
+    public static void writeOAuth(HashMap<String,String> oAuthVars, String filePath) throws IOException  {  
     
     	Files.write(Paths.get(filePath), "".getBytes(),StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING );
     

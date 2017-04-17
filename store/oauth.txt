@@ -1,5 +1,5 @@
-authToken:72157647029609305-838676ff0f16554f
-authSecret:8c281edcae082331
-apiKey:eccbfec6885f6adefb2fd063dce81a20
-sharedSecret:b114d59e550cf4e9
+authToken:72157682576933816-13994d21f509afcc
+authSecret:903478aa09729458
+apiKey:c3d608ad4fa1e7527d7e6aff3957f288
+sharedSecret:7fc26e7de0e295fe
 permission:Permission.DELETE;

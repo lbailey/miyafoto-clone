@@ -27,7 +27,7 @@
     	<div id="canvas">
 
     		<header id="header">
-    		<h2>miya<span class="add">moto</span>-foto</h2>
+    		<h2>miya<span class="add">foto</span>-clone</h2>
 			  <div id="topNav"  data-content-field="navigation-navigation" style="margin-right: 20%">
 				  <nav class="main-nav">
 					<ul id="siteNav">

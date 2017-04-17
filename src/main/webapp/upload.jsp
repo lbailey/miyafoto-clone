@@ -35,7 +35,7 @@ $(document).ready(function(){
 	var minOffset = 0, maxOffset = 7; // Change to whatever you want
 	var thisYear = (new Date()).getFullYear();
 	var select = $('<select id="albumYear">');
-	var typeSet = ['formal','shower','festival','holiday','athletic','misc' ];
+	var typeSet = ['travel','friends','food','holiday','art','misc' ];
 	var difference = [];
 
 	for (var i = minOffset; i <= maxOffset; i++) {
