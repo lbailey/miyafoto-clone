@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 <base href="">
 <meta charset="utf-8" />
-<title>miyamoto.foto</title>
+<title>miyamoto.foto clone</title>
 <link rel="stylesheet" type="text/css" href="/includes/site.css"/>
 <link rel="shortcut icon" href="includes/favicon.ico" type="image/x-icon">
 <link rel="icon" href="includes/favicon.ico" type="image/x-icon">
